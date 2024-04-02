@@ -1,0 +1,11 @@
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaPrytzh_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaCAM70_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaGiessen4_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaSvalof_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaCN113611_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaAmes1043_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaBorowska_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaLicalla_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaCAM116_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaLindo_xCHROMx.fa
+/home/#######_scratch_f13/pangenome_workflow/ref_data/CsativaAcsn-226_xCHROMx.fa

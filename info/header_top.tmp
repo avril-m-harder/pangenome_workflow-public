@@ -1,0 +1,9 @@
+##fileformat=VCFv4.2
+##fileDate=sDATE
+##reference=sREF
+##source=VarScan2cns
+##FILTER=<ID=str10,Description="Less than 10% or more than 90% of variant supporting reads on one strand">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=RD,Number=1,Type=Integer,Description="Depth of reference-supporting bases (reads1)">
+##FORMAT=<ID=AD,Number=1,Type=Integer,Description="Depth of variant-supporting bases (reads2)">
+##FORMAT=<ID=PVAL,Number=1,Type=String,Description="P-value from Fisher's Exact Test">

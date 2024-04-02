@@ -1,0 +1,11 @@
+CsativaPrytzh	CsativaPrytzh_xCHROMx.fa
+CsativaCAM70	CsativaCAM70_xCHROMx.fa
+CsativaGiessen4	CsativaGiessen4_xCHROMx.fa
+CsativaSvalof	CsativaSvalof_xCHROMx.fa
+CsativaCN113611	CsativaCN113611_xCHROMx.fa
+CsativaAmes1043	CsativaAmes1043_xCHROMx.fa
+CsativaBorowska	CsativaBorowska_xCHROMx.fa
+CsativaLicalla	CsativaLicalla_xCHROMx.fa
+CsativaCAM116	CsativaCAM116_xCHROMx.fa
+CsativaLindo	CsativaLindo_xCHROMx.fa
+CsativaAcsn-226	CsativaAcsn-226_xCHROMx.fa
