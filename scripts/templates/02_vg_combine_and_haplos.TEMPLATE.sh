@@ -5,10 +5,10 @@
 #$ -V
 #$ -N vg_combine_02
 #$ -m ae
-#$ -M #######@hudsonalpha.org
+#$ -M aharder@hudsonalpha.org
 
 source ~/.bashrc
-source /home/#######_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
 
 ## create temp directory and echo path to .o file
 TMP_DIR=`/bin/mktemp -d -p /mnt/data1/tmp`
@@ -189,6 +189,8 @@ echo "${line[0]} - complete - " $(date -u) >> ${LOGFILE}
 # Collecting summary stats
 # -----------------------------------------------------------------------------
 
+echo "running summary scripts - " $(date -u) >> ${LOGFILE}
+
 ## Coverage of each sample X each chromosome in the graph
 cat $(find ${INDIR} -name "minigraph.split.log") > \
 ${GRAPH_STATS_DIR}/minigraph_split_logs.txt
@@ -249,6 +251,7 @@ Rscript --vanilla \
 	${REF_DIR} \
 	${GRAPH_STATS_PLOTS}/${base}_chrom_coverage_graphic.pdf
 
+echo "complete - " $(date -u) >> ${LOGFILE}
 
 # -----------------------------------------------------------------------------
 # Clean up tmp dir
