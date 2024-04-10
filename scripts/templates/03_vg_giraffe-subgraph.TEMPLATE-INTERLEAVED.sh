@@ -5,10 +5,10 @@
 #$ -V
 #$ -N vg_giraffe_03_SAMP_NAME
 #$ -m ae
-#$ -M #######@hudsonalpha.org
+#$ -M aharder@hudsonalpha.org
 
 source ~/.bashrc
-source /home/#######_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
 
 ## create temp directory and echo path to .o file
 TMP_DIR=`/bin/mktemp -d -p /mnt/data1/tmp`
@@ -43,15 +43,17 @@ GAM="${SAMP}_subgraph.gam"
 BAM="${SAMP}_subgraph.bam"
 SORTGAM="${SAMP}_subgraph.sorted.gam"
 SORTBAM="${SAMP}_subgraph.sorted.bam"
+DEDUPBAM="${SAMP}_subgraph.sorted.dedup.bam"
+STATS="dup_metrics_${SAMP}_subgraph_giraffeBAM.txt"
 KFF="${SAMP}.kff"
 
 LOGFILE="${LOG_DIR}/03_giraffe_${SAMP}_$(date +"%Y_%m_%d_%I_%M_%p").log"
 touch ${LOGFILE}
 
 ## count k-mers of various lengths in sample reads
-rsync -avuP ${READ_DIR}/FQ_FILE .
-
 if [ ! -f ${KMC_OUT}/${KFF} ]; then
+
+	rsync -avuP ${READ_DIR}/FQ_FILE .
 
 	## if using hammer, ~7.8 Gb memory/CPU? 192 CPU, 1.5 Tb
 	echo "SAMP_NAME - counting ${KLEN}-mers - " $(date -u) >> ${LOGFILE}
@@ -127,6 +129,8 @@ fi
 echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> GAM - " $(date -u) >> ${LOGFILE}
 
 if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
+	
+	rsync -avuP ${READ_DIR}/FQ_FILE .
 
 	vg giraffe \
 		-Z ${SUBGBZ} \
@@ -166,8 +170,8 @@ echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> BAM - " $(date -u) >> ${LOGFI
 if [ ! -f ${OUTDIR}/${SORTBAM} ]; then
 	vg giraffe \
 		-Z ${SUBGBZ} \
-		--fastq-in FQ_FILE \
-		--interleaved \
+		--fastq-in FQ_FILE_1 \
+		--fastq-in FQ_FILE_2 \
 		--max-multimaps 1 \
 		-o BAM \
 		--sample SAMP_NAME_k${KLEN} \
@@ -186,9 +190,39 @@ if [ ! -f ${OUTDIR}/${SORTBAM} ]; then
 	
 	samtools flagstat ${SORTBAM} > \
 	${BAM_STATS_DIR}/${SORTBAM}_flagstat.txt
+else
+
+	rsync -avuP ${OUTDIR}/${SORTBAM} .
 
 fi
 
+mamba deactivate
+
+	# -------------------------------------------------------------------------
+	# Dedup BAM if it'll go
+	# -------------------------------------------------------------------------
+
+	echo "SAMP_NAME - dedup-ing BAM - " $(date -u) >> ${LOGFILE}
+	
+	mamba activate ${MAMBA}/bioinfo_tools
+	
+	picard MarkDuplicates \
+		I=${SORTBAM} \
+		O=${DEDUPBAM} \
+		M=${STATS} \
+		VALIDATION_STRINGENCY=LENIENT \
+		ASSUME_SORTED=true \
+		SORTING_COLLECTION_SIZE_RATIO=0.05 \
+		REMOVE_DUPLICATES=true \
+		TMP_DIR=${TMP_DIR} \
+		MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
+		MAX_RECORDS_IN_RAM=2750000 \
+		READ_NAME_REGEX='[a-zA-Z0-9]+[:_][0-9]+[:_][a-zA-Z0-9]+[:_][0-9]+[:_]([0-9]+)[:_]([0-9]+)[:_]([0-9]+)' \
+		CREATE_INDEX=true
+		
+	rsync -avuP ${STATS} ${BAM_STATS_DIR}
+	rsync -avuP ${DEDUPBAM} ${OUTDIR}
+	
 	
 echo "SAMP_NAME - complete - " $(date -u) >> ${LOGFILE}
 	

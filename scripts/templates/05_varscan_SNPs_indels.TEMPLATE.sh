@@ -5,10 +5,10 @@
 #$ -V
 #$ -N varscan_05_SAMP_NAME
 #$ -m ae
-#$ -M #######@hudsonalpha.org
+#$ -M aharder@hudsonalpha.org
 
 source ~/.bashrc
-source /home/#######_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
 
 ## create temp directory and echo path to .o file
 TMP_DIR=`/bin/mktemp -d -p /mnt/data1/tmp`
@@ -27,16 +27,23 @@ OUTDIR="${VARSCAN_OUT_DIR}"
 REF_PATH_FA_BGZIP="mc_${TAXON}_all_chroms_${PRIMREF}_path.fa.gz"
 SAMP="SAMP_NAME_k${KLEN}"
 SORTBAM="${SAMP}_subgraph.sorted.bam"
+DEDUPBAM="${SAMP}_subgraph.sorted.dedup.bam"
 MPILEUP="${SAMP}_subgraph.giraffeBAM.mpileup"
 TMP_VCF="${SAMP}_subgraph.giraffeBAM.tmp.vcf.gz"
 FINAL_VCF="${SAMP}_subgraph.giraffeBAM.vcf.gz"
-D8_VCF="${SAMP}_subgraph.giraffeBAM.d8.vcf.gz"
+
+if [ ! -f ${INDIR}/${DEDUPBAM} ]; then
+	rsync -avuP ${INDIR}/${SORTBAM} .
+	INBAM=${SORTBAM}
+else
+	rsync -avuP ${INDIR}/${DEDUPBAM} .
+	INBAM=${DEDUPBAM}
+fi
 
 LOGFILE="${LOG_DIR}/05_varscan_${SAMP}_$(date +"%Y_%m_%d_%I_%M_%p").log"
 touch ${LOGFILE}
 
 rsync -avuP ${MC_OUT_DIR}/${REF_PATH_FA_BGZIP} .
-rsync -avuP ${INDIR}/${SORTBAM} .
 
 # -----------------------------------------------------------------------------
 # Prep reference and header info
@@ -58,6 +65,22 @@ bgzip -c -@ ${VARSCAN_NTHREADS} > ${SAMP}.header.gz
 
 
 # -----------------------------------------------------------------------------
+# Calculate mean read depth and lower/upper depth limits for keeping variants
+# -----------------------------------------------------------------------------
+
+samtools coverage ${INBAM} > tmp.coverage.txt
+
+AVG_DP=$(grep -v "^#" tmp.coverage.txt | awk '{ sum1+=($3*$7); } { sum2+=$3; } END{ print sum1/sum2;}')
+LO_LIM=$(awk -vdp=$AVG_DP -vlo=$LO_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
+if (( $(echo "$LO_LIM $MIN" | awk '{print ($1 < $2)}') )); then
+	LO_LIM=$MIN
+fi
+UP_LIM=$(awk -vdp=$AVG_DP -vlo=$UP_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
+
+DEPTHFILT_VCF="${SAMP}_subgraph.giraffeBAM.d${LO_LIM}-${UP_LIM}.vcf.gz"
+
+
+# -----------------------------------------------------------------------------
 # Generate pileup and call variants with varscan
 # -----------------------------------------------------------------------------
 
@@ -67,7 +90,7 @@ samtools mpileup \
 	-Q 20 \
 	-f ${REF_PATH_FA_BGZIP} \
 	-o ${MPILEUP} \
-	${SORTBAM}
+	${INBAM}
 
 echo "SAMP_NAME - calling variants - " $(date -u) >> ${LOGFILE}
 varscan mpileup2cns \
@@ -81,10 +104,9 @@ varscan mpileup2cns \
 
 cat ${SAMP}.header.gz ${TMP_VCF} > ${FINAL_VCF}
 
-## filter to keep sites with read depth >= 8
-gzip -dck ${FINAL_VCF} | \
-awk '/^#/ {print} OFS="\t" {split($10,a,":"); split(a[2],b,","); $10 = a[1]; $9="GT"; if(b[1] + b[2] >= 8) print $0}' | \
-bgzip -c ${VARSCAN_NTHREADS} > ${D8_VCF}
+## filter to keep sites with acceptable read depths
+filt="(FMT/RD + FMT/AD)>=${LO_LIM} & (FMT/RD + FMT/AD)<=${UP_LIM}"
+bcftools filter -i "$filt" ${FINAL_VCF} | bgzip -c ${VARSCAN_NTHREADS} > ${DEPTHFILT_VCF}
 
 
 # -----------------------------------------------------------------------------
@@ -94,7 +116,7 @@ bgzip -c ${VARSCAN_NTHREADS} > ${D8_VCF}
 echo "SAMP_NAME - complete - " $(date -u) >> ${LOGFILE}
 
 rsync -avuP ${FINAL_VCF} ${OUTDIR}
-rsync -avuP ${D8_VCF} ${OUTDIR}
+rsync -avuP ${DEPTHFILT_VCF} ${OUTDIR}
 cd ${OUTDIR}
 rm -rf ${TMP_DIR}
 

@@ -6,12 +6,12 @@
 # pangenome graph workflow. It should be included in all scripts for each step of
 # the workflow. Put the following line in the scripts:
 #
-#     source /home/#######_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+#     source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
 #
 
 ## Set main project directory
 WDNAME="pangenome_workflow"
-WORKDIR="/home/#######_scratch_f13/${WDNAME}"
+WORKDIR="/home/aharder_scratch_f13/${WDNAME}"
 
 ## Set taxon name (can be anything useful for ID)
 TAXON="camelinaTEST"
@@ -44,9 +44,9 @@ ${READ_DIR} ${KMC_OUT} ${LOG_DIR} ${ODGI_OUT} ${GRAPH_STATS_DIR} ${GRAPH_STATS_P
 ${BAM_STATS_DIR} ${CALL_OUT_DIR}
 
 ## program directories
-STM_DIR="/home/#######/bin/sequenceTubeMap/scripts"
-STMVIZ_DIR="/home/#######_scratch_f13/seqTubeMap_input_data"
-MAMBA="/home/#######/.conda/envs"
+STM_DIR="/home/aharder/bin/sequenceTubeMap/scripts"
+STMVIZ_DIR="/home/aharder_scratch_f13/seqTubeMap_input_data"
+MAMBA="/home/aharder/.conda/envs"
 
 
 # -----------------------------------------------------------------------------
@@ -128,3 +128,18 @@ FQ_LIST="${INFO_DIR}/noJoelle_fq_list.txt"
 ## Set number of threads and queue and edit script header
 VG_CALL_NTHREADS=32
 QUEUE_04=all.q
+
+
+# -----------------------------------------------------------------------------
+# Set 05.sh varscan options
+# -----------------------------------------------------------------------------
+
+## Minimum acceptable read depth for keeping a variant call
+MIN=8
+
+## Minimum acceptable read depth: LO_PROP * mean depth of initial BAM
+## Will use higher of this value of MIN (e.g., if LO_LIM = 6, value used will be 8)
+LO_PROP=0.25
+
+## Maximum acceptable read depth: UP_PROP * mean depth of initial BAM
+UP_PROP=2

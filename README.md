@@ -1,6 +1,6 @@
 # pangenome_workflow
 
-## Starting ingredients:
+### Starting ingredients:
 ```
 .
 |____info
@@ -33,10 +33,13 @@
 ```
 
 
-order of operations:
+### Order of operations:
 1. add reference FASTA and read FASTQ files to appropriate dirs
 2. update /info/fq_list.txt and /info/cactus*.txt files
 3. update 00.sh and 99.sh as necessary
 4. edit and run PREP_01.sh as necessary
 5. run 00.sh
 6. qsub each 01.sh script, run rest of numbered bash jobs in order as previous steps finish
+
+### To do:
+* add read dedup to GAM process

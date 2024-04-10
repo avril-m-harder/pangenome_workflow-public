@@ -5,10 +5,10 @@
 #$ -V
 #$ -N vg_call_04_SAMP_NAME
 #$ -m ae
-#$ -M #######@hudsonalpha.org
+#$ -M aharder@hudsonalpha.org
 
 source ~/.bashrc
-source /home/#######_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
 
 ## create temp directory and echo path to .o file
 TMP_DIR=`/bin/mktemp -d -p /mnt/data1/tmp`
@@ -105,7 +105,7 @@ grep "^#CHROM" ${NORMVCF} > tmp.header2
 cat tmp2.header1 tmp.header2 > full.header
 
 grep -v "^#" ${NORMVCF} | \
-awk '{if ((length($4)-length($5))>=50 || (length($5)-length($4))>=50) print $0}' > \
+awk '{if (sqrt(((length($4)-length($5))^2))<50) print $0}' > \
 tmp.${SAMP}.vcf
 
 cat full.header tmp.${SAMP}.vcf | \
