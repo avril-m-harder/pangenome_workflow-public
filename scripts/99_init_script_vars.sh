@@ -29,10 +29,12 @@ STATS_DIR="${WORKDIR}/stats"
 MC_OUT_DIR="${WORKDIR}/mc_output"
 GIR_OUT_DIR="${WORKDIR}/vg_giraffe_output"
 CALL_OUT_DIR="${WORKDIR}/vg_call_output"
+VARSCAN_OUT_DIR="${WORKDIR}/varscan_output"
 GIR_STATS_DIR="${STATS_DIR}/vg_giraffe_gam_stats"
 BAM_STATS_DIR="${STATS_DIR}/vg_bam_stats"
 GRAPH_STATS_DIR="${STATS_DIR}/graph_stats_info"
 GRAPH_STATS_PLOTS="${GRAPH_STATS_DIR}/plots"
+DEDUP_STATS_DIR="${STATS_DIR}/dedup_bam_stats"
 READ_DIR="${WORKDIR}/prepped_reads"
 KMC_OUT="${WORKDIR}/kmc_output"
 LOG_DIR="${WORKDIR}/logfiles"
@@ -41,7 +43,7 @@ ODGI_OUT="${WORKDIR}/odgi_output"
 
 mkdir -p ${REF_DIR} ${STATS_DIR} ${MC_OUT_DIR} ${GIR_OUT_DIR} ${GIR_STATS_DIR} \
 ${READ_DIR} ${KMC_OUT} ${LOG_DIR} ${ODGI_OUT} ${GRAPH_STATS_DIR} ${GRAPH_STATS_PLOTS} \
-${BAM_STATS_DIR} ${CALL_OUT_DIR}
+${BAM_STATS_DIR} ${CALL_OUT_DIR} ${VARSCAN_OUT_DIR} ${DEDUP_STATS_DIR}
 
 ## program directories
 STM_DIR="/home/aharder/bin/sequenceTubeMap/scripts"
@@ -133,6 +135,8 @@ QUEUE_04=all.q
 # -----------------------------------------------------------------------------
 # Set 05.sh varscan options
 # -----------------------------------------------------------------------------
+VARSCAN_NTHREADS=32
+QUEUE_05=all.q
 
 ## Minimum acceptable read depth for keeping a variant call
 MIN=8

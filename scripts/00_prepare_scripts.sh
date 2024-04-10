@@ -3,7 +3,7 @@
 # prepare_scripts.sh
 #
 
-source /home/#######_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh 
+source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh 
 
 # -----------------------------------------------------------------------------
 # Set 01.sh Minigraph-Cactus options
@@ -134,5 +134,31 @@ do
 	
 	sed -i "s/pangenome_workflow/${WDNAME}/g" \
 	${VG_CALL_SAMP_SCRIPT_DIR}/04_vg_call_SV_${line[0]}.sh
+		
+done < ${FQ_LIST}
+
+
+# -----------------------------------------------------------------------------
+# Set 05.sh varscan options
+# -----------------------------------------------------------------------------
+## Sample-level script directory
+VARSCAN_SAMP_SCRIPT_DIR="${SCRIPT_DIR}/05_varscan_SNPs_indels_samp_scripts"
+mkdir -p ${VARSCAN_SAMP_SCRIPT_DIR}
+
+while read -a line
+do
+		
+	sed "s/SAMP_NAME/${line[0]}/g" \
+		${TEMPLATE_DIR}/05_varscan_SNPs_indels.TEMPLATE.sh > \
+		${VARSCAN_SAMP_SCRIPT_DIR}/05_varscan_SNPs_indels_${line[0]}.sh
+	
+	sed -i "s/QUEUE05/${QUEUE_05}/g" \
+	${VARSCAN_SAMP_SCRIPT_DIR}/05_varscan_SNPs_indels_${line[0]}.sh
+	
+	sed -i "s/VARSCANNTHREADS/${VG_CALL_NTHREADS}/g" \
+	${VARSCAN_SAMP_SCRIPT_DIR}/05_varscan_SNPs_indels_${line[0]}.sh
+	
+	sed -i "s/pangenome_workflow/${WDNAME}/g" \
+	${VARSCAN_SAMP_SCRIPT_DIR}/05_varscan_SNPs_indels_${line[0]}.sh
 		
 done < ${FQ_LIST}

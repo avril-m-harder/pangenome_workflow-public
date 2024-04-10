@@ -40,48 +40,54 @@ touch ${LOGFILE}
 # Compute read support (pack) and call variants (call)
 # -----------------------------------------------------------------------------
 
-rsync -avuP ${INDIR}/${SUBXG} .
-rsync -avuP ${INDIR}/${SORTGAM} .
+if [ ! -f ${OUTDIR}/${OUTVCF} ]; then
 
-echo "(1/4) running vg filter - " $(date -u) >> ${LOGFILE}
-vg filter \
-	${SORTGAM} \
-	--threads ${VG_CALL_NTHREADS} \
-	-r 0.90 \
-	-fu \
-	-m 1 \
-	-q 15 \
-	-D 999 \
-	-x ${SUBXG} > \
-	${FILTGAM}
+	rsync -avuP ${INDIR}/${SUBXG} .
+	rsync -avuP ${INDIR}/${SORTGAM} .
+
+	echo "(1/4) running vg filter - " $(date -u) >> ${LOGFILE}
+	vg filter \
+		${SORTGAM} \
+		--threads ${VG_CALL_NTHREADS} \
+		-r 0.90 \
+		-fu \
+		-m 1 \
+		-q 15 \
+		-D 999 \
+		-x ${SUBXG} > \
+		${FILTGAM}
 	
-vg stats \
-	-a ${FILTGAM} \
-	${SUBGBZ} > \
-	${GIR_STATS_DIR}/${FILTGAM}_stats.txt
+	vg stats \
+		-a ${FILTGAM} \
+		${SUBGBZ} > \
+		${GIR_STATS_DIR}/${FILTGAM}_stats.txt
 
-echo "(2/4) running vg pack - " $(date -u) >> ${LOGFILE}
-vg pack \
-	-x ${SUBXG} \
-	-g ${FILTGAM} \
-	-Q 5 \
-	--threads ${VG_CALL_NTHREADS} \
-	-o tmp.pack
+	echo "(2/4) running vg pack - " $(date -u) >> ${LOGFILE}
+	vg pack \
+		-x ${SUBXG} \
+		-g ${FILTGAM} \
+		-Q 5 \
+		--threads ${VG_CALL_NTHREADS} \
+		-o tmp.pack
 
-echo "(3/4) running vg call - " $(date -u) >> ${LOGFILE}
-## -a = genotype every snarl, including reference calls (gVCF)
-vg call \
-	${SUBXG} \
-	-a \
-	--sample ${SAMP} \
-	--threads ${VG_CALL_NTHREADS} \
-	-k tmp.pack > \
-	${OUTVCF}
+	echo "(3/4) running vg call - " $(date -u) >> ${LOGFILE}
+	## -a = genotype every snarl, including reference calls (gVCF)
+	vg call \
+		${SUBXG} \
+		-a \
+		--sample ${SAMP} \
+		--threads ${VG_CALL_NTHREADS} \
+		-k tmp.pack > \
+		${OUTVCF}
 	
-rm tmp.pack
+	rm tmp.pack
 
-## edit weirdly formatted chrom names output by Minigraph-Cactus in header
-sed -i "s/${PRIMREF}#0#//g" ${OUTVCF}
+	## edit weirdly formatted chrom names output by Minigraph-Cactus in header
+	sed -i "s/${PRIMREF}#0#//g" ${OUTVCF}
+else
+	rsync -avuP ${OUTDIR}/${OUTVCF} .
+fi
+
 
 # -----------------------------------------------------------------------------
 # Normalize and filter to keep passing variants >= 50 bp in length
