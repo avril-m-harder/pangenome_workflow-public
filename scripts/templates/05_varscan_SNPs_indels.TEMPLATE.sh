@@ -39,11 +39,26 @@ else
 	rsync -avuP ${INDIR}/${DEDUPBAM} .
 	INBAM=${DEDUPBAM}
 fi
+FILTBAM=$(basename ${INBAM} .bam).filt.bam
 
 LOGFILE="${LOG_DIR}/05_varscan_${SAMP}_$(date +"%Y_%m_%d_%I_%M_%p").log"
 touch ${LOGFILE}
 
 rsync -avuP ${MC_OUT_DIR}/${REF_PATH_FA_BGZIP} .
+
+# -----------------------------------------------------------------------------
+# Filter BAM file
+# -----------------------------------------------------------------------------
+
+samtools view \
+	--min-MQ 15 \
+	-@ ${VARSCAN_NTHREADS} \
+	-b \
+	-o ${FILTBAM} \
+	${INBAM}
+	
+rsync -avuP ${FILTBAM} ${INDIR}
+
 
 # -----------------------------------------------------------------------------
 # Prep reference and header info
@@ -68,7 +83,7 @@ bgzip -c -@ ${VARSCAN_NTHREADS} > ${SAMP}.header.gz
 # Calculate mean read depth and lower/upper depth limits for keeping variants
 # -----------------------------------------------------------------------------
 
-samtools coverage ${INBAM} > tmp.coverage.txt
+samtools coverage ${FILTBAM} > tmp.coverage.txt
 
 AVG_DP=$(grep -v "^#" tmp.coverage.txt | awk '{ sum1+=($3*$7); } { sum2+=$3; } END{ print sum1/sum2;}')
 LO_LIM=$(awk -vdp=$AVG_DP -vlo=$LO_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
@@ -78,6 +93,7 @@ fi
 UP_LIM=$(awk -vdp=$AVG_DP -vlo=$UP_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
 
 DEPTHFILT_VCF="${SAMP}_subgraph.giraffeBAM.d${LO_LIM}-${UP_LIM}.vcf.gz"
+D8_VCF="${SAMP}_subgraph.giraffeBAM.d8.vcf.gz"
 
 
 # -----------------------------------------------------------------------------
@@ -90,7 +106,7 @@ samtools mpileup \
 	-Q 20 \
 	-f ${REF_PATH_FA_BGZIP} \
 	-o ${MPILEUP} \
-	${INBAM}
+	${FILTBAM}
 
 echo "SAMP_NAME - calling variants - " $(date -u) >> ${LOGFILE}
 varscan mpileup2cns \
@@ -106,8 +122,12 @@ cat ${SAMP}.header.gz ${TMP_VCF} > ${FINAL_VCF}
 
 ## filter to keep sites with acceptable read depths
 filt="(FMT/RD + FMT/AD)>=${LO_LIM} & (FMT/RD + FMT/AD)<=${UP_LIM}"
-bcftools filter -i "$filt" ${FINAL_VCF} | bgzip -c ${VARSCAN_NTHREADS} > ${DEPTHFILT_VCF}
+bcftools filter -i "$filt" ${FINAL_VCF} | bgzip -c -@ ${VARSCAN_NTHREADS} > ${DEPTHFILT_VCF}
 
+## filter to keep sites with >= 8 reads
+LO_LIM=8
+filt="(FMT/RD + FMT/AD)>=${LO_LIM}"
+bcftools filter -i "$filt" ${FINAL_VCF} | bgzip -c -@ ${VARSCAN_NTHREADS} > ${D8_VCF}
 
 # -----------------------------------------------------------------------------
 # Clean up tmp dir
@@ -117,6 +137,7 @@ echo "SAMP_NAME - complete - " $(date -u) >> ${LOGFILE}
 
 rsync -avuP ${FINAL_VCF} ${OUTDIR}
 rsync -avuP ${DEPTHFILT_VCF} ${OUTDIR}
+rsync -avuP ${D8_VCF} ${OUTDIR}
 cd ${OUTDIR}
 rm -rf ${TMP_DIR}
 

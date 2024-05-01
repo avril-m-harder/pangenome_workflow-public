@@ -34,7 +34,6 @@ OUTVCF="${SAMP}_mc_subgraph.vcf"
 FILTVCF="${SAMP}_mc_subgraph_PASS.vcf"
 NORMVCF="${SAMP}_mc_subgraph_PASS.norm.vcf"
 SVVCF="${SAMP}_mc_subgraph_PASS.norm.SVsONLY.vcf.gz"
-SVVCF="${SAMP}_mc_subgraph_PASS.norm.SVsONLY.vcf.gz"
 
 LOGFILE="${LOG_DIR}/04_vg_call_${SAMP}_$(date +"%Y_%m_%d_%I_%M_%p").log"
 touch ${LOGFILE}
@@ -43,7 +42,7 @@ touch ${LOGFILE}
 # Compute read support (pack) and call variants (call)
 # -----------------------------------------------------------------------------
 
-if [ ! -f ${OUTDIR}/${OUTVCF} ]; then
+if [ ! -f ${OUTDIR}/${OUTVCF}.gz ]; then
 
 	rsync -avuP ${INDIR}/${SUBXG} .
 	rsync -avuP ${INDIR}/${SORTGAM} .
@@ -88,7 +87,7 @@ if [ ! -f ${OUTDIR}/${OUTVCF} ]; then
 	## edit weirdly formatted chrom names output by Minigraph-Cactus in header
 	sed -i "s/${PRIMREF}#0#//g" ${OUTVCF}
 else
-	rsync -avuP ${OUTDIR}/${OUTVCF} .
+	rsync -avuP ${OUTDIR}/${OUTVCF}.gz .
 fi
 
 
@@ -131,39 +130,42 @@ fi
 # ! Based on giraffe BAM output, not GAM, so rough estimate ! 
 # -----------------------------------------------------------------------------
 
-if [ ! -f ${INDIR}/${DEDUPBAM} ]; then
-	rsync -avuP ${INDIR}/${SORTBAM} .
-	INBAM=${SORTBAM}
-else
-	rsync -avuP ${INDIR}/${DEDUPBAM} .
-	INBAM=${DEDUPBAM}
-fi
+if [ ! -f ${OUTDIR}/${DEPTHFILT_VCF} ]; then
+	if [ ! -f ${INDIR}/${DEDUPBAM} ]; then
+		rsync -avuP ${INDIR}/${SORTBAM} .
+		INBAM=${SORTBAM}
+	else
+		rsync -avuP ${INDIR}/${DEDUPBAM} .
+		INBAM=${DEDUPBAM}
+	fi
 
-samtools coverage ${INBAM} > tmp.coverage.txt
+	samtools coverage ${INBAM} > tmp.coverage.txt
 
-AVG_DP=$(grep -v "^#" tmp.coverage.txt | awk '{ sum1+=($3*$7); } { sum2+=$3; } END{ print sum1/sum2;}')
-LO_LIM=$(awk -vdp=$AVG_DP -vlo=$LO_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
-if (( $(echo "$LO_LIM $MIN" | awk '{print ($1 < $2)}') )); then
-	LO_LIM=$MIN
-fi
-UP_LIM=$(awk -vdp=$AVG_DP -vlo=$UP_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
+	AVG_DP=$(grep -v "^#" tmp.coverage.txt | awk '{ sum1+=($3*$7); } { sum2+=$3; } END{ print sum1/sum2;}')
+	LO_LIM=$(awk -vdp=$AVG_DP -vlo=$LO_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
+	if (( $(echo "$LO_LIM $MIN" | awk '{print ($1 < $2)}') )); then
+		LO_LIM=$MIN
+	fi
+	UP_LIM=$(awk -vdp=$AVG_DP -vlo=$UP_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
 
-DEPTHFILT_VCF="${SAMP}_mc_subgraph_PASS.norm.SVsONLY.d${LO_LIM}-${UP_LIM}.vcf.gz"
+	DEPTHFILT_VCF="${SAMP}_mc_subgraph_PASS.norm.SVsONLY.d${LO_LIM}-${UP_LIM}.vcf.gz"
 	
-## filter to keep sites with acceptable read depths
-filt="(FMT/DP)>=${LO_LIM} & (FMT/DP)<=${UP_LIM}"
-bcftools filter -i "$filt" ${SVVCF} | bgzip -c ${VG_CALL_NTHREADS} > ${DEPTHFILT_VCF}
+	## filter to keep sites with acceptable read depths
+	filt="(FMT/DP)>=${LO_LIM} & (FMT/DP)<=${UP_LIM}"
+	bcftools filter -i "$filt" ${SVVCF} | bgzip -c -@ ${VG_CALL_NTHREADS} > ${DEPTHFILT_VCF}
 
-# -----------------------------------------------------------------------------
-# Clean up tmp dir
-# -----------------------------------------------------------------------------
-rm tmp.coverage.txt
-rm tmp.${SAMP}.vcf
-rm ${FILTVCF}
-rm ${NORMVCF}
+	# -----------------------------------------------------------------------------
+	# Clean up tmp dir
+	# -----------------------------------------------------------------------------
+	rm tmp.coverage.txt
+	rm tmp.${SAMP}.vcf
+	rm ${FILTVCF}
+	rm ${NORMVCF}
 
-gzip *.vcf
-rsync -avuP *.vcf.gz ${OUTDIR}
+	gzip *.vcf
+	rsync -avuP *.vcf.gz ${OUTDIR}
+
+fi
 
 echo "SAMP_NAME - complete - " $(date -u) >> ${LOGFILE}
 cd ${OUTDIR}
