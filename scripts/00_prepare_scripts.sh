@@ -110,8 +110,6 @@ else
 fi
 
 
-
-
 # -----------------------------------------------------------------------------
 # Set 04.sh vg call options
 # -----------------------------------------------------------------------------
@@ -162,3 +160,9 @@ do
 	${VARSCAN_SAMP_SCRIPT_DIR}/05_varscan_SNPs_indels_${line[0]}.sh
 		
 done < ${FQ_LIST}
+
+# -----------------------------------------------------------------------------
+# Set accessory script options
+# -----------------------------------------------------------------------------
+sed -i "s/pangenome_workflow/${WDNAME}/g" \
+${SCRIPT_DIR}/accessory_functions/ACC_01_odgi_ad_hoc_plots.sh
