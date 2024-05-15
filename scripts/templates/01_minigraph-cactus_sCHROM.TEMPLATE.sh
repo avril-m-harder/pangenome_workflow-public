@@ -5,11 +5,11 @@
 #$ -V
 #$ -N cactus_sCHROM
 #$ -m ae
-#$ -M #######@hudsonalpha.org
+#$ -M aharder@hudsonalpha.org
 
 
 source ~/.bashrc
-source /home/#######_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
 
 ## create temp directory and echo path to .o file
 TMP_DIR=`/bin/mktemp -d -p /mnt/data1/tmp`
@@ -90,6 +90,8 @@ echo "sCHROM - graph construction complete - " $(date -u) >> ${LOGFILE}
 
 mamba activate ${MAMBA}/pg_tools
 
+cut -f 1 sCHROM_seqfile.txt > samp.list
+
 echo "sCHROM - starting odgi - " $(date -u) >> ${LOGFILE}
 OG=$(find . -name "*.og")
 for OGFN in ${OG}
@@ -99,6 +101,7 @@ do
 	SORTOG="${base}.sorted.og"
 	PNG="${TAXON}_${base}.sorted.png"
 	INV_PNG="${TAXON}_${base}.sorted.inversions.png"
+	COL_PNG="${TAXON}_${base}.sorted.collapsed.png"
 
 	odgi sort \
 		-i ${OGFN} \
@@ -118,6 +121,12 @@ do
 		--threads ${MC_NTHREADS} \
 		-o ${INV_PNG} \
 		-z
+	
+	odgi viz \
+		-i ${SORTOG} \
+		--threads ${MC_NTHREADS} \
+		-o ${COL_PNG} \
+		-M samp.list
 
 done
 
@@ -127,6 +136,7 @@ mamba deactivate
 # -----------------------------------------------------------------------------
 # Clean up tmp dir
 # -----------------------------------------------------------------------------
+rm *.list
 rm *.fa
 rm *.fa.gz
 rm *.img
