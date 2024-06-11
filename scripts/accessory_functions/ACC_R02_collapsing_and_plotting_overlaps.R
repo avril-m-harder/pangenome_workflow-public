@@ -72,7 +72,7 @@ for(s in samps){
         tot.ints <- sum(as.numeric(ints[,2]))
         rm(SAVE)
       } else{
-        ints <- cbind(gsub('class=','',do.call(rbind, strsplit(intersects$rep.info[r], split = ';'))[,4]), intersects$olap.len)
+        ints <- cbind(gsub('class=','',do.call(rbind, strsplit(intersects$rep.info, split = ';'))[,4]), intersects$olap.len)
         tot.ints <- sum(as.numeric(ints[,2]))
       }
       
