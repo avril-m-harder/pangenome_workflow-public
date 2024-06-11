@@ -166,3 +166,6 @@ done < ${FQ_LIST}
 # -----------------------------------------------------------------------------
 sed -i "s/pangenome_workflow/${WDNAME}/g" \
 ${SCRIPT_DIR}/accessory_functions/ACC_01_odgi_ad_hoc_plots.sh
+
+sed -i "s/pangenome_workflow/${WDNAME}/g" \
+${SCRIPT_DIR}/accessory_functions/ACC_02_clipped_seq_analysis.sh

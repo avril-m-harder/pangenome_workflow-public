@@ -22,6 +22,7 @@ TAXON="camelinaTEST"
 INFO_DIR="${WORKDIR}/info"
 SCRIPT_DIR="${WORKDIR}/scripts"
 TEMPLATE_DIR="${SCRIPT_DIR}/templates"
+ACC_FUNC_DIR="${SCRIPT_DIR}/accessory_functions"
 REF_DIR="${WORKDIR}/ref_data"
 STATS_DIR="${WORKDIR}/stats"
 
@@ -39,11 +40,12 @@ READ_DIR="${WORKDIR}/prepped_reads"
 KMC_OUT="${WORKDIR}/kmc_output"
 LOG_DIR="${WORKDIR}/logfiles"
 ODGI_OUT="${WORKDIR}/odgi_output"
+CLIP_OUT="${WORKDIR}/clipped_sequence_analyses"
 
 
 mkdir -p ${REF_DIR} ${STATS_DIR} ${MC_OUT_DIR} ${GIR_OUT_DIR} ${GIR_STATS_DIR} \
 ${READ_DIR} ${KMC_OUT} ${LOG_DIR} ${ODGI_OUT} ${GRAPH_STATS_DIR} ${GRAPH_STATS_PLOTS} \
-${BAM_STATS_DIR} ${CALL_OUT_DIR} ${VARSCAN_OUT_DIR} ${DEDUP_STATS_DIR}
+${BAM_STATS_DIR} ${CALL_OUT_DIR} ${VARSCAN_OUT_DIR} ${DEDUP_STATS_DIR} ${CLIP_OUT}
 
 ## program directories
 STM_DIR="/home/aharder/bin/sequenceTubeMap/scripts"
