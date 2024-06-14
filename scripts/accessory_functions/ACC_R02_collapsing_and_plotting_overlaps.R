@@ -178,7 +178,7 @@ plot(0, 0, col = 'transparent', xlim = c(0.75, nrow(R.sum.stats)+0.25), ylim = c
   par(xpd = TRUE)
   legend('top', legend = c('Clipped sequence','Repetitive clipped sequence','Genic clipped sequence (\'gene\')',
                                 'Genic clipped sequence (\'CDS\')'),
-         col = c('grey30','chocolate1','dodgerblue2','springgreen3'), pch = 16, pt.cex = 1.5, inset = -0.3)
+         col = c('grey30','chocolate1','dodgerblue2','springgreen3'), pch = 16, pt.cex = 1.5, inset = -0.4)
 dev.off()
 
 temp <- merge(R.sum.stats, G.sum.stats[,c(1,5,6)], by = 'samp')

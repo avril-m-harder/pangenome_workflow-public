@@ -59,6 +59,7 @@ do
 	cut -f1,2 ${FAI} > ${SAMP}.genome
 	
 	bedtools sort \
+		-g ${SAMP}.genome \
 		-i ${SAMP}_subpath_included_coords.bed > \
 		${SAMP}_subpath_included_coords.sorted.bed
 	

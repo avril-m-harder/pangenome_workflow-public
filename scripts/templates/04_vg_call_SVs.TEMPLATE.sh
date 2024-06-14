@@ -114,7 +114,7 @@ if [ ! -f ${OUTDIR}/${SVVCF} ]; then
 	cat tmp2.header1 tmp.header2 > full.header
 
 	grep -v "^#" ${NORMVCF} | \
-	awk '{if (sqrt(((length($4)-length($5))^2))<50) print $0}' > \
+	awk '{if (sqrt(((length($4)-length($5))^2))>=50) print $0}' > \
 	tmp.${SAMP}.vcf
 
 	cat full.header tmp.${SAMP}.vcf | \
