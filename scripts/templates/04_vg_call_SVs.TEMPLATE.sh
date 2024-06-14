@@ -149,10 +149,16 @@ if [ ! -f ${OUTDIR}/${DEPTHFILT_VCF} ]; then
 	UP_LIM=$(awk -vdp=$AVG_DP -vlo=$UP_PROP 'BEGIN{printf "%.0f" ,dp * lo}')
 
 	DEPTHFILT_VCF="${SAMP}_mc_subgraph_PASS.norm.SVsONLY.d${LO_LIM}-${UP_LIM}.vcf.gz"
+	D8_VCF="${SAMP}_subgraph_PASS.norm.SVsONLY.d8.vcf.gz"
 	
 	## filter to keep sites with acceptable read depths
 	filt="(FMT/DP)>=${LO_LIM} & (FMT/DP)<=${UP_LIM}"
 	bcftools filter -i "$filt" ${SVVCF} | bgzip -c -@ ${VG_CALL_NTHREADS} > ${DEPTHFILT_VCF}
+	
+	## filter to keep sites with acceptable read depths
+	LO_LIM=8
+	filt="(FMT/RD + FMT/AD)>=${LO_LIM}"
+	bcftools filter -i "$filt" ${SVVCF} | bgzip -c -@ ${VG_CALL_NTHREADS} > ${D8_VCF}
 
 	# -----------------------------------------------------------------------------
 	# Clean up tmp dir
