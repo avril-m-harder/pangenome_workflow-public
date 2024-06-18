@@ -53,19 +53,23 @@ touch ${LOGFILE}
 ## count k-mers of various lengths in sample reads
 if [ ! -f ${KMC_OUT}/${KFF} ]; then
 
-	rsync -avuP ${READ_DIR}/FQ_FILE .
+	rsync -LvP FQ_FILE .
+
+	FQ=$(ls ./*fastq*)
+
+	if [[ ${FQ} == *.bz2 ]]; then
+		bzip2 -d ${FQ}
+		FQ=$(basename ${FQ} .bz2)
+	fi
 
 	## if using hammer, ~7.8 Gb memory/CPU? 192 CPU, 1.5 Tb
 	echo "SAMP_NAME - counting ${KLEN}-mers - " $(date -u) >> ${LOGFILE}
-	apptainer exec \
-		-H $(pwd) \
-		${KMCDOCK} \
-		kmc \
+	kmc \
 		-k${KLEN} \
 		-m200 \
 		-okff \
 		-t${VG_GIR_NTHREADS} \
-		FQ_FILE \
+		${FQ} \
 		${SAMP} \
 		.
 
@@ -129,12 +133,23 @@ fi
 echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> GAM - " $(date -u) >> ${LOGFILE}
 
 if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
-	
-	rsync -avuP ${READ_DIR}/FQ_FILE .
 
+	if [ -z "${FQ}" ]; then
+	
+		rsync -LvP FQ_FILE .
+
+		FQ=$(ls ./*fastq*)
+
+		if [[ ${FQ} == *.bz2 ]]; then
+			bzip2 -d ${FQ}
+			FQ=$(basename ${FQ} .bz2)
+		fi
+
+	fi
+	
 	vg giraffe \
 		-Z ${SUBGBZ} \
-		--fastq-in FQ_FILE \
+		--fastq-in ${FQ} \
 		--interleaved \
 		--max-multimaps 1 \
 		-o gam \
@@ -168,10 +183,24 @@ echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> BAM - " $(date -u) >> ${LOGFI
 
 
 if [ ! -f ${OUTDIR}/${SORTBAM} ]; then
+
+	if [ -z "${FQ}" ]; then
+	
+		rsync -LvP FQ_FILE .
+
+		FQ=$(ls ./*fastq*)
+
+		if [[ ${FQ} == *.bz2 ]]; then
+			bzip2 -d ${FQ}
+			FQ=$(basename ${FQ} .bz2)
+		fi
+
+	fi
+
 	vg giraffe \
 		-Z ${SUBGBZ} \
-		--fastq-in FQ_FILE_1 \
-		--fastq-in FQ_FILE_2 \
+		--fastq-in ${FQ} \
+		--interleaved \
 		--max-multimaps 1 \
 		-o BAM \
 		--sample SAMP_NAME_k${KLEN} \

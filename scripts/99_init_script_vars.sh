@@ -82,6 +82,7 @@ MC_NTHREADS=32
 ## >>> Option 2: Set a single input haplotype as a reference path in the full graph (this
 ##				 will also be the primary reference included in all subgraphs).
 REFARR=("CsativaPrytzh")
+REFSAMP=${REFARR[0]}
 PRIMREF=${REFARR[0]}
 ## ------------------------------------------------------
 
