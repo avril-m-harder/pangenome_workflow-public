@@ -58,7 +58,7 @@ MAMBA="/home/aharder/.conda/envs"
 # -----------------------------------------------------------------------------
 
 ## Cactus version and number of threads
-readonly CACTUS_IMAGE=docker://quay.io/comparative-genomics-toolkit/cactus:v2.7.1
+readonly CACTUS_IMAGE=docker://quay.io/comparative-genomics-toolkit/cactus:v2.8.3
 
 ## Files with sample info
 readonly SEQFILE="${INFO_DIR}/cactus_CHROM_seqfile_noJoelle.txt"

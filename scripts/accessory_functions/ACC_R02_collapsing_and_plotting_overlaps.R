@@ -147,38 +147,40 @@ colnames(G.sum.stats) <- c('samp', 'tot.genom.len', 'tot.clip.len', 'prop.genom.
 for(c in 2:ncol(G.sum.stats)){
   G.sum.stats[,c] <- as.numeric(G.sum.stats[,c])
 }
-
+R.sum.stats <- R.sum.stats[order(R.sum.stats$tot.clip.len, decreasing = FALSE),]
+G.sum.stats <- G.sum.stats[order(G.sum.stats$tot.clip.len, decreasing = FALSE),]
 if(nrow(R.sum.stats) < 5){
 	wid <- nrow(R.sum.stats)*2
 } else{
 	wid <- nrow(R.sum.stats)*1
 }
 wid <- min(wid, 12)
-pdf(paste0(taxon,'_clipped_sequence_summary.pdf'), width = wid, height = 6)
+pdf(paste0(taxon,'_clipped_sequence_summary.pdf'), width = 6, height = wid)
 bmar <- max(nchar(R.sum.stats$samp))/1.5
-par(mar = c(bmar, 4, 6, 1)+0.1)
-plot(0, 0, col = 'transparent', xlim = c(0.75, nrow(R.sum.stats)+0.25), ylim = c(0, max(R.sum.stats$prop.genom.clip)),
-     ylab = 'Proportion of input genome',
-     xaxt = 'n', xlab = '', main = '')
+par(mar = c(5, bmar, 6, 1)+0.1)
+plot(0, 0, col = 'transparent', ylim = c(0.75, nrow(R.sum.stats)+0.25), xlim = c(0, max(R.sum.stats$prop.genom.clip)),
+     xlab = 'Proportion of input genome',
+     yaxt = 'n', ylab = '', main = '')
   for(r in 1:nrow(R.sum.stats)){
     prop.clip <- R.sum.stats$prop.genom.clip[r]
     prop.repeat <- R.sum.stats$prop.genom.clip[r]*R.sum.stats$prop.clip.repeats[r]
     prop.gene <- G.sum.stats$prop.genom.clip[r]*G.sum.stats$prop.clip.genes[r]
     prop.cds <- G.sum.stats$prop.genom.clip[r]*G.sum.stats$prop.clip.cds[r]
-    points(r-.15, prop.clip, pch = 16, cex = 1.5, col = 'grey30')
-    lines(c(r-.15, r-.15), c(0, prop.clip), lwd = 4, col = 'grey30')
-    points(r-.05, prop.repeat, pch = 16, cex = 1.5, col = 'chocolate1')
-    lines(c(r-.05, r-.05), c(0, prop.repeat), lwd = 4, col = 'chocolate1')
-    points(r+.05, prop.gene, pch = 16, cex = 1.5, col = 'dodgerblue2')
-    lines(c(r+.05, r+.05), c(0, prop.gene), lwd = 4, col = 'dodgerblue2')
-    points(r+.15, prop.gene, pch = 16, cex = 1.5, col = 'springgreen3')
-    lines(c(r+.15, r+.15), c(0, prop.gene), lwd = 4, col = 'springgreen3')
+    points(prop.clip, r-.15, pch = 16, cex = 1.5, col = 'grey30')
+    lines(c(0, prop.clip), c(r-.15, r-.15), lwd = 4, col = 'grey30')
+    points(prop.repeat, r-.05, pch = 16, cex = 1.5, col = 'chocolate1')
+    lines(c(0, prop.repeat), c(r-.05, r-.05), lwd = 4, col = 'chocolate1')
+    points(prop.gene, r+.05, pch = 16, cex = 1.5, col = 'dodgerblue2')
+    lines(c(0, prop.gene), c(r+.05, r+.05), lwd = 4, col = 'dodgerblue2')
+    points(prop.gene, r+.15, pch = 16, cex = 1.5, col = 'springgreen3')
+    lines(c(0, prop.gene), c(r+.15, r+.15), lwd = 4, col = 'springgreen3')
+    axis(2, at = r, labels = R.sum.stats$samp[r], las = 2)
   }
-  axis(1, at = c(1:nrow(R.sum.stats)), labels = R.sum.stats$samp, las = 2)
+
   par(xpd = TRUE)
   legend('top', legend = c('Clipped sequence','Repetitive clipped sequence','Genic clipped sequence (\'gene\')',
                                 'Genic clipped sequence (\'CDS\')'),
-         col = c('grey30','chocolate1','dodgerblue2','springgreen3'), pch = 16, pt.cex = 1.5, inset = -0.4)
+         col = c('grey30','chocolate1','dodgerblue2','springgreen3'), pch = 16, pt.cex = 1.5, inset = -0.11)
 dev.off()
 
 temp <- merge(R.sum.stats, G.sum.stats[,c(1,5,6)], by = 'samp')
