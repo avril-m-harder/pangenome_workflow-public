@@ -42,6 +42,7 @@ SUBGBZ="mc_${TAXON}_all_chroms.gfa.${SAMP}.subgraph.gbz"
 GAM="${SAMP}_subgraph.gam"
 BAM="${SAMP}_subgraph.bam"
 SORTGAM="${SAMP}_subgraph.sorted.gam"
+GAMINDEX="${SAMP}_subgraph.sorted.gam.gai"
 SORTBAM="${SAMP}_subgraph.sorted.bam"
 DEDUPBAM="${SAMP}_subgraph.sorted.dedup.bam"
 STATS="dup_metrics_${SAMP}_subgraph_giraffeBAM.txt"
@@ -159,7 +160,15 @@ if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 		${GAM}
 
 	echo "SAMP_NAME - preparing sTM index for subgraph GAM - " $(date -u) >> ${LOGFILE}
-	${STM_DIR}/prepare_gam.sh ${GAM}
+	
+	vg gamsort \
+		-i ${GAMINDEX} \
+		--threads ${VG_GIR_NTHREADS} \
+		${GAM} > \
+		${SORTGAM}
+	
+	rsync -avuP ${GAMINDEX} ${STMVIZ_DIR}
+	rsync -avuP ${GAMINDEX} ${OUTDIR}
 	rsync -avuP ${SORTGAM} ${STMVIZ_DIR}
 	rsync -avuP ${GAM} ${OUTDIR}
 	rsync -avuP ${SORTGAM} ${OUTDIR}
@@ -168,6 +177,7 @@ if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 		-a ${SORTGAM} \
 		${SUBGBZ} > \
 		${GIR_STATS_DIR}/${SORTGAM}_stats.txt
+		
 else
 
 	rsync -avuP ${OUTDIR}/${SORTGAM} .

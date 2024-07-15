@@ -157,7 +157,7 @@ if [ ! -f ${OUTDIR}/${DEPTHFILT_VCF} ]; then
 	
 	## filter to keep sites with acceptable read depths
 	LO_LIM=8
-	filt="(FMT/RD + FMT/AD)>=${LO_LIM}"
+	filt="(FMT/DP)>=${LO_LIM}"
 	bcftools filter -i "$filt" ${SVVCF} | bgzip -c -@ ${VG_CALL_NTHREADS} > ${D8_VCF}
 
 	# -----------------------------------------------------------------------------

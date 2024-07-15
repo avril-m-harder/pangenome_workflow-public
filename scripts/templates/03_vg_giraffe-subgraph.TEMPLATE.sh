@@ -169,7 +169,15 @@ if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 		${GAM}
 
 	echo "SAMP_NAME - preparing sTM index for subgraph GAM - " $(date -u) >> ${LOGFILE}
-	${STM_DIR}/prepare_gam.sh ${GAM}
+
+	vg gamsort \
+		-i ${GAMINDEX} \
+		--threads ${VG_GIR_NTHREADS} \
+		${GAM} > \
+		${SORTGAM}
+	
+	rsync -avuP ${GAMINDEX} ${STMVIZ_DIR}
+	rsync -avuP ${GAMINDEX} ${OUTDIR}
 	rsync -avuP ${SORTGAM} ${STMVIZ_DIR}
 	rsync -avuP ${GAM} ${OUTDIR}
 	rsync -avuP ${SORTGAM} ${OUTDIR}
@@ -178,6 +186,7 @@ if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 		-a ${SORTGAM} \
 		${SUBGBZ} > \
 		${GIR_STATS_DIR}/${SORTGAM}_stats.txt
+		
 else
 
 	rsync -avuP ${OUTDIR}/${SORTGAM} .
