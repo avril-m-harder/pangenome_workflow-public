@@ -41,11 +41,13 @@ KMC_OUT="${WORKDIR}/kmc_output"
 LOG_DIR="${WORKDIR}/logfiles"
 ODGI_OUT="${WORKDIR}/odgi_output"
 CLIP_OUT="${WORKDIR}/clipped_sequence_analyses"
+NCOORDS_OUT="${WORKDIR}/node_coord_search_output"
 
 
 mkdir -p ${REF_DIR} ${STATS_DIR} ${MC_OUT_DIR} ${GIR_OUT_DIR} ${GIR_STATS_DIR} \
 ${READ_DIR} ${KMC_OUT} ${LOG_DIR} ${ODGI_OUT} ${GRAPH_STATS_DIR} ${GRAPH_STATS_PLOTS} \
-${BAM_STATS_DIR} ${CALL_OUT_DIR} ${VARSCAN_OUT_DIR} ${DEDUP_STATS_DIR} ${CLIP_OUT}
+${BAM_STATS_DIR} ${CALL_OUT_DIR} ${VARSCAN_OUT_DIR} ${DEDUP_STATS_DIR} ${CLIP_OUT} \
+${NCOORDS_OUT}
 
 ## program directories
 STM_DIR="/home/aharder/bin/sequenceTubeMap/scripts"

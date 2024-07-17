@@ -169,3 +169,6 @@ ${SCRIPT_DIR}/accessory_functions/ACC_01_odgi_ad_hoc_plots.sh
 
 sed -i "s/pangenome_workflow/${WDNAME}/g" \
 ${SCRIPT_DIR}/accessory_functions/ACC_02_clipped_seq_analysis.sh
+
+sed -i "s/pangenome_workflow/${WDNAME}/g" \
+${SCRIPT_DIR}/accessory_functions/ACC_03_getting_coordinates_from_node_IDs.sh
