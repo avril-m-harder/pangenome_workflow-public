@@ -7,6 +7,29 @@
 #$ -m ae
 #$ -M aharder@hudsonalpha.org
 
+##—<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>—<>—<>—<>—##
+##                                                                                     ##
+##  Takes input file (*_breakpoint_nodes.txt, described in first section below) and    ##
+##  determines haplotype-specific coordinates for either the first or last position of ##
+##  a known node of interest. Coordinates are with respect to the original sequence    ##
+##  input to the graph.																   ##
+##  																				   ##
+##  Output file format is a tsv (*_breakpoint_coords.txt) with the columns:			   ##
+##  1)  node annotation = can be whatever desciptive name you set for each node	       ##
+##		>>  if pulling sequences (below), include *_start and *_end with match 		   ##
+##			prefixes to indicate bounds for ROIs									   ##
+##  2)  sample = ... sample/haplotype name                                             ##
+##  3)  node ID = node ID in the graph (integer)                                       ##
+##  4)  chromosome																	   ##
+##  5)  start/end coordinate = coordinate of start or end of node of interest in	   ##
+##  	path of interest (start or end is indicated in input file)                     ##
+##  6) start coordinate of subpath traversing node of interest						   ##
+##  																				   ##
+##  Can also auto extract sequences corresponding to ROIs if indicated by PULL_SEQS    ##
+##  setting in first section below.													   ##
+##                                                                                     ##
+##—<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>—<>—<>—<>—##
+
 source ~/.bashrc
 source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
 
@@ -154,6 +177,58 @@ do
 
 done < node_coords.txt
 echo ">>> breakpoint coordinate calculation complete - " $(date -u) >> ${LOGFILE}
+
+# -----------------------------------------------------------------------------
+# Pull sequences if option is set (automated)
+# -----------------------------------------------------------------------------
+
+if [ ${PULL_SEQS} -eq 1 ]; then
+
+	OUTFAS=${base}_ROI_sequences.fa
+
+	while read -a line
+	do
+
+		if [[ ${line[0]} == *"start"*  ]]; then
+			
+			START=${line[0]}
+			BASE=$(basename ${START} _start)
+			END=$(echo "${BASE}_end")
+			SAMP=${line[1]}
+			CHROM=${line[3]}
+			
+			## subtract 1 to go from base-1 to base-0 for BED input to seqtk
+			S_COORD=$((${line[4]}-1))
+			S_SUBPATH=${line[5]}
+			
+			E_COORD=$(grep ${END} ${base}_breakpoint_coords.txt | \
+			grep ${SAMP} | grep ${CHROM} | awk '{print $5}')
+			E_SUBPATH=$(grep ${END} ${base}_breakpoint_coords.txt | \
+			grep ${SAMP} | grep ${CHROM} | awk '{print $6}')
+		
+		
+			INFAS=$(ls ${REF_DIR}/*${SAMP}*${CHROM}*)
+			echo -e "${CHROM}\t${S_COORD}\t${E_COORD}" > tmp.bed
+			seqtk subseq ${INFAS} tmp.bed > tmp.fas
+		
+			if [[ "${S_SUBPATH}" != "${E_SUBPATH}" ]]; then
+				sed -i "s/>${CHROM}/>${SAMP}|${CHROM}|${BASE}|CONTAINS_CLIPPED/g" tmp.fas
+			else
+				sed -i "s/>${CHROM}/>${SAMP}|${CHROM}|${BASE}/g" tmp.fas
+			fi
+			
+			cat tmp.fas >> ${OUTFAS}
+		
+			rm tmp.bed
+			rm tmp.fas
+
+		fi
+
+	done < ${base}_breakpoint_coords.txt
+	
+	rsync -avuP ${OUTFAS} ${OUTDIR}
+
+fi
 
 # -----------------------------------------------------------------------------
 # Clean up tmp dir (automated)
