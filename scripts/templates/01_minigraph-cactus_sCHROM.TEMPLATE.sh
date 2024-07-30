@@ -91,6 +91,7 @@ echo "sCHROM - graph construction complete - " $(date -u) >> ${LOGFILE}
 mamba activate ${MAMBA}/pg_tools
 
 cut -f 1 sCHROM_seqfile.txt > samp.list
+sed -e 's/$/#/' -i samp.list
 
 echo "sCHROM - starting odgi - " $(date -u) >> ${LOGFILE}
 OG=$(find . -name "*.og")
@@ -120,6 +121,7 @@ do
 		-i ${SORTOG} \
 		--threads ${MC_NTHREADS} \
 		-o ${INV_PNG} \
+		-M samp.list \
 		-z
 	
 	odgi viz \
