@@ -16,7 +16,7 @@
 ##  																				   ##
 ##  Output file format is a tsv (*_breakpoint_coords.txt) with the columns:			   ##
 ##  1)  node annotation = can be whatever desciptive name you set for each node	       ##
-##		>>  if pulling sequences (below), include *_start and *_end with match 		   ##
+##		>>  if pulling sequences (below), include *_start and *_end with matching	   ##
 ##			prefixes to indicate bounds for ROIs									   ##
 ##  2)  sample = ... sample/haplotype name                                             ##
 ##  3)  node ID = node ID in the graph (integer)                                       ##
@@ -25,8 +25,10 @@
 ##  	path of interest (start or end is indicated in input file)                     ##
 ##  6) start coordinate of subpath traversing node of interest						   ##
 ##  																				   ##
-##  Can also auto extract sequences corresponding to ROIs if indicated by PULL_SEQS    ##
-##  setting in first section below.													   ##
+##  Can also auto extract sequences corresponding to ROIs if indicated by setting	   ##
+##  PULL_SEQS=1 in first section below.	Specify whether FASTA entries should be        ##
+##  written to a single FASTA file (N_FILES=0) or if each entry should be written to   ##
+##  its own file (N_FILES=1)														   ##
 ##                                                                                     ##
 ##—<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>——<>—<>—<>—<>—##
 
@@ -39,7 +41,7 @@ cd ${TMP_DIR}
 echo "${TMP_DIR}"
 
 # -----------------------------------------------------------------------------
-# Set which set of breakpoint nodes you want coordinates for
+# Set options and which set of breakpoint nodes you want coordinates for
 # -----------------------------------------------------------------------------
 
 ## node list file: breakpoint ID / sample / node ID / start or end
@@ -55,6 +57,9 @@ echo "${TMP_DIR}"
 
 NODELIST="${INFO_DIR}/example_breakpoint_nodes.txt"
 base=$(basename ${NODELIST} _breakpoint_nodes.txt)
+
+PULL_SEQS=1
+N_FILES=1
 
 # -----------------------------------------------------------------------------
 # Set variable names, activate env (automated)
@@ -184,50 +189,96 @@ echo ">>> breakpoint coordinate calculation complete - " $(date -u) >> ${LOGFILE
 
 if [ ${PULL_SEQS} -eq 1 ]; then
 
-	OUTFAS=${base}_ROI_sequences.fa
+	if [ ${N_FILES} -eq 0 ]; then
 
-	while read -a line
-	do
+		OUTFAS=${base}_ROI_sequences.fa
 
-		if [[ ${line[0]} == *"start"*  ]]; then
+		while read -a line
+		do
+
+			if [[ ${line[0]} == *"start"*  ]]; then
 			
-			START=${line[0]}
-			BASE=$(basename ${START} _start)
-			END=$(echo "${BASE}_end")
-			SAMP=${line[1]}
-			CHROM=${line[3]}
+				START=${line[0]}
+				BASE=$(basename ${START} _start)
+				END=$(echo "${BASE}_end")
+				SAMP=${line[1]}
+				CHROM=${line[3]}
 			
-			## subtract 1 to go from base-1 to base-0 for BED input to seqtk
-			S_COORD=$((${line[4]}-1))
-			S_SUBPATH=${line[5]}
+				## subtract 1 to go from base-1 to base-0 for BED input to seqtk
+				S_COORD=$((${line[4]}-1))
+				S_SUBPATH=${line[5]}
 			
-			E_COORD=$(grep ${END} ${base}_breakpoint_coords.txt | \
-			grep ${SAMP} | grep ${CHROM} | awk '{print $5}')
-			E_SUBPATH=$(grep ${END} ${base}_breakpoint_coords.txt | \
-			grep ${SAMP} | grep ${CHROM} | awk '{print $6}')
+				E_COORD=$(grep ${END} ${base}_breakpoint_coords.txt | \
+				grep ${SAMP} | grep ${CHROM} | awk '{print $5}')
+				E_SUBPATH=$(grep ${END} ${base}_breakpoint_coords.txt | \
+				grep ${SAMP} | grep ${CHROM} | awk '{print $6}')
 		
 		
-			INFAS=$(ls ${REF_DIR}/*${SAMP}*${CHROM}*)
-			echo -e "${CHROM}\t${S_COORD}\t${E_COORD}" > tmp.bed
-			seqtk subseq ${INFAS} tmp.bed > tmp.fas
+				INFAS=$(ls ${REF_DIR}/*${SAMP}*${CHROM}*)
+				echo -e "${CHROM}\t${S_COORD}\t${E_COORD}" > tmp.bed
+				seqtk subseq ${INFAS} tmp.bed > tmp.fas
 		
-			if [[ "${S_SUBPATH}" != "${E_SUBPATH}" ]]; then
-				sed -i "s/>${CHROM}/>${SAMP}|${CHROM}|${BASE}|CONTAINS_CLIPPED/g" tmp.fas
-			else
-				sed -i "s/>${CHROM}/>${SAMP}|${CHROM}|${BASE}/g" tmp.fas
+				if [[ "${S_SUBPATH}" != "${E_SUBPATH}" ]]; then
+					sed -i "s/>${CHROM}/>${SAMP}|${CHROM}|${BASE}|CONTAINS_CLIPPED/g" tmp.fas
+				else
+					sed -i "s/>${CHROM}/>${SAMP}|${CHROM}|${BASE}/g" tmp.fas
+				fi
+			
+				cat tmp.fas >> ${OUTFAS}
+		
+				rm tmp.bed
+				rm tmp.fas
+
 			fi
-			
-			cat tmp.fas >> ${OUTFAS}
-		
-			rm tmp.bed
-			rm tmp.fas
 
-		fi
-
-	done < ${base}_breakpoint_coords.txt
+		done < ${base}_breakpoint_coords.txt
 	
-	rsync -avuP ${OUTFAS} ${OUTDIR}
+		rsync -avuP ${OUTFAS} ${OUTDIR}
+	
+	fi
+	if [ ${N_FILES} -eq 1 ]; then
 
+		while read -a line
+		do
+
+			if [[ ${line[0]} == *"start"*  ]]; then
+			
+				START=${line[0]}
+				BASE=$(basename ${START} _start)
+				END=$(echo "${BASE}_end")
+				SAMP=${line[1]}
+				CHROM=${line[3]}
+			
+				## subtract 1 to go from base-1 to base-0 for BED input to seqtk
+				S_COORD=$((${line[4]}-1))
+				S_SUBPATH=${line[5]}
+			
+				E_COORD=$(grep ${END} ${base}_breakpoint_coords.txt | \
+				grep ${SAMP} | grep ${CHROM} | awk '{print $5}')
+				E_SUBPATH=$(grep ${END} ${base}_breakpoint_coords.txt | \
+				grep ${SAMP} | grep ${CHROM} | awk '{print $6}')
+		
+				INFAS=$(ls ${REF_DIR}/*${SAMP}*${CHROM}*)
+				echo -e "${CHROM}\t${S_COORD}\t${E_COORD}" > tmp.bed
+				seqtk subseq ${INFAS} tmp.bed > tmp.fas
+		
+				if [[ "${S_SUBPATH}" != "${E_SUBPATH}" ]]; then
+					OUTFAS="${SAMP}-${CHROM}_${S_COORD}_${E_COORD}-${BASE}-CONTAINS_CLIPPED.fa"
+					sed "s/>${CHROM}/>${SAMP}|${CHROM}|${BASE}|CONTAINS_CLIPPED/g" tmp.fas > ${OUTFAS}
+				else
+					OUTFAS="${SAMP}-${CHROM}_${S_COORD}_${E_COORD}-${BASE}.fa"
+					sed "s/>${CHROM}/>${SAMP}|${CHROM}|${BASE}/g" tmp.fas > ${OUTFAS}
+				fi
+		
+				rm tmp.bed
+				rm tmp.fas
+				rsync -avuP ${OUTFAS} ${OUTDIR}
+
+			fi
+
+		done < ${base}_breakpoint_coords.txt
+	
+	fi
 fi
 
 # -----------------------------------------------------------------------------
