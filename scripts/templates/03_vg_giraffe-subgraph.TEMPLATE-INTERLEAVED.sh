@@ -64,7 +64,7 @@ if [ ! -f ${KMC_OUT}/${KFF} ]; then
 	fi
 
 	## if using hammer, ~7.8 Gb memory/CPU? 192 CPU, 1.5 Tb
-	echo "SAMP_NAME - counting ${KLEN}-mers - " $(date -u) >> ${LOGFILE}
+	echo "SAMP_NAME - counting ${KLEN}-mers - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	kmc \
 		-k${KLEN} \
 		-m200 \
@@ -84,7 +84,7 @@ fi
 
 
 ## sample haplotypes to build subgraph (include ref path only if there's only 1)
-echo "SAMP_NAME - haplotype sampling k=${KLEN} to build subgraph - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - haplotype sampling k=${KLEN} to build subgraph - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 if [ ! -f ${OUTDIR}/${SUBGBZ} ]; then
 
@@ -117,7 +117,7 @@ if [ ! -f ${OUTDIR}/${SUBGBZ} ]; then
 			
 	fi
 		
-	echo "SAMP_NAME - preparing sTM index for subgraph GBZ - " $(date -u) >> ${LOGFILE}
+	echo "SAMP_NAME - preparing sTM index for subgraph GBZ - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	${STM_DIR}/prepare_vg.sh ${SUBGBZ}
 	rsync -avuP ${SUBGBZ}* ${STMVIZ_DIR}
 	rsync -avuP ${SUBGBZ}* ${OUTDIR}
@@ -131,7 +131,7 @@ fi
 # Map short reads to haplotype-sampled graph file - for SV calling
 # ----------------------------------------------------------------------------- 
 
-echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> GAM - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> GAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 
@@ -159,7 +159,7 @@ if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 		--progress > \
 		${GAM}
 
-	echo "SAMP_NAME - preparing sTM index for subgraph GAM - " $(date -u) >> ${LOGFILE}
+	echo "SAMP_NAME - preparing sTM index for subgraph GAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	
 	vg gamsort \
 		-i ${GAMINDEX} \
@@ -189,7 +189,7 @@ fi
 # Map short reads to haplotype-sampled graph file --> BAM - for SNP calling
 # ----------------------------------------------------------------------------- 
 
-echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> BAM - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> BAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 
 if [ ! -f ${OUTDIR}/${SORTBAM} ]; then
@@ -241,7 +241,7 @@ mamba deactivate
 	# Dedup BAM if it'll go
 	# -------------------------------------------------------------------------
 
-	echo "SAMP_NAME - dedup-ing BAM - " $(date -u) >> ${LOGFILE}
+	echo "SAMP_NAME - dedup-ing BAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	
 	mamba activate ${MAMBA}/bioinfo_tools
 	
@@ -263,7 +263,7 @@ mamba deactivate
 	rsync -avuP ${DEDUPBAM} ${OUTDIR}
 	
 	
-echo "SAMP_NAME - complete - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	
 
 # -----------------------------------------------------------------------------

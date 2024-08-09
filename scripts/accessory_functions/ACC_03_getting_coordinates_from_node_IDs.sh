@@ -94,13 +94,13 @@ do
 	NODEID=${line[2]}
 	S_OR_E=${line[3]}
 	
-	echo "starting search for node annot = ${NODEANNOT} - " $(date -u) >> ${LOGFILE}
+	echo "starting search for node annot = ${NODEANNOT} - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	
 	if [ ${HAP} == "all" ]; then
 		
 		## identify which haplotypes traverse that node
 		declare -a HAPS=( $(grep "^W" ${GFA} | grep "[^0-9]${NODEID}[^0-9]" | awk '{print $2}') )
-		echo ">>> ${#HAPS[@]} haps found for node ${NODEID} - " $(date -u) >> ${LOGFILE}
+		echo ">>> ${#HAPS[@]} haps found for node ${NODEID} - " $(TZ=${ZONE} date) >> ${LOGFILE}
 		
 		for HAP in ${HAPS[@]}
 		do
@@ -119,11 +119,11 @@ do
 		
 	fi
 	
-	echo ">>> node annot = ${NODEANNOT} search complete - " $(date -u) >> ${LOGFILE}
+	echo ">>> node annot = ${NODEANNOT} search complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	
 done < ${NODELIST}
 
-echo "starting node coordinate pull - " $(date -u) >> ${LOGFILE}
+echo "starting node coordinate pull - " $(TZ=${ZONE} date) >> ${LOGFILE}
 while read -a line
 do
 	SAMP=${line[0]}
@@ -150,9 +150,9 @@ do
 	echo -e "${NODEANNOT}"'\t'"${SAMP}"'\t'"${FINDOUT}"'\t'"${CHROM}"'\t'"${STARTCOORD}"'\t'"${S_OR_E}" >> node_coords.txt	
 		
 done < subpaths.txt
-echo ">>> node coordinate pull complete - " $(date -u) >> ${LOGFILE}
+echo ">>> node coordinate pull complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
-echo "starting breakpoint coordinate calculation - " $(date -u) >> ${LOGFILE}
+echo "starting breakpoint coordinate calculation - " $(TZ=${ZONE} date) >> ${LOGFILE}
 while read -a line
 do
 	if [[ "${line[5]}" -eq 1 ]]; then
@@ -181,7 +181,7 @@ do
 	fi
 
 done < node_coords.txt
-echo ">>> breakpoint coordinate calculation complete - " $(date -u) >> ${LOGFILE}
+echo ">>> breakpoint coordinate calculation complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 # -----------------------------------------------------------------------------
 # Pull sequences if option is set (automated)

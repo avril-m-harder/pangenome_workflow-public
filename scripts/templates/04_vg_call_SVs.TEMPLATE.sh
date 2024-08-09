@@ -47,7 +47,7 @@ if [ ! -f ${OUTDIR}/${OUTVCF}.gz ]; then
 	rsync -avuP ${INDIR}/${SUBXG} .
 	rsync -avuP ${INDIR}/${SORTGAM} .
 
-	echo "(1/4) running vg filter - " $(date -u) >> ${LOGFILE}
+	echo "(1/4) running vg filter - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	vg filter \
 		${SORTGAM} \
 		--threads ${VG_CALL_NTHREADS} \
@@ -64,7 +64,7 @@ if [ ! -f ${OUTDIR}/${OUTVCF}.gz ]; then
 		${SUBGBZ} > \
 		${GIR_STATS_DIR}/${FILTGAM}_stats.txt
 
-	echo "(2/4) running vg pack - " $(date -u) >> ${LOGFILE}
+	echo "(2/4) running vg pack - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	vg pack \
 		-x ${SUBXG} \
 		-g ${FILTGAM} \
@@ -72,7 +72,7 @@ if [ ! -f ${OUTDIR}/${OUTVCF}.gz ]; then
 		--threads ${VG_CALL_NTHREADS} \
 		-o tmp.pack
 
-	echo "(3/4) running vg call - " $(date -u) >> ${LOGFILE}
+	echo "(3/4) running vg call - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	## -a = genotype every snarl, including reference calls (gVCF)
 	vg call \
 		${SUBXG} \
@@ -96,7 +96,7 @@ fi
 # -----------------------------------------------------------------------------
 
 if [ ! -f ${OUTDIR}/${SVVCF} ]; then
-	echo "(4/4) running VCF filtering - " $(date -u) >> ${LOGFILE}
+	echo "(4/4) running VCF filtering - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	bcftools view \
 		-f PASS \
 		${OUTVCF} > \
@@ -173,7 +173,7 @@ if [ ! -f ${OUTDIR}/${DEPTHFILT_VCF} ]; then
 
 fi
 
-echo "SAMP_NAME - complete - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 cd ${OUTDIR}
 rm -rf ${TMP_DIR}
 

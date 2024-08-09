@@ -16,6 +16,9 @@ WORKDIR="/home/aharder_scratch_f13/${WDNAME}"
 ## Set taxon name (can be anything useful for ID)
 TAXON="camelinaTEST"
 
+## Can set time zone for timestamps in log files
+ZONE="America/Chicago"
+
 # -----------------------------------------------------------------------------
 # Create input and output directories
 # -----------------------------------------------------------------------------

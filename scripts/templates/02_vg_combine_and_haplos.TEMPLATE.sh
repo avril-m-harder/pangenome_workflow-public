@@ -21,7 +21,7 @@ echo "${TMP_DIR}"
 
 INDIR="${MC_OUT_DIR}"
 OUTDIR="${GIR_OUT_DIR}"
-LOGFILE="${LOG_DIR}/02_haplos_$(date +"%Y_%m_%d_%I_%M_%p").log"
+LOGFILE="${LOG_DIR}/02_haplos_$(TZ=${ZONE} date +"%Y_%m_%d_%I_%M_%p").log"
 
 if [ ${#REFARR[@]} -eq 1 ]; then
 	GFA="mc_${TAXON}_all_chroms.gfa"
@@ -52,7 +52,7 @@ touch ${LOGFILE}
 
 if [ ! -f ${INDIR}/${GFA} ]; then
 
-	echo "merging chrom-level GFAs - " $(date -u) >> ${LOGFILE}
+	echo "merging chrom-level GFAs - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 	for CHROM in ${chroms[@]}
 	do
@@ -84,7 +84,7 @@ fi
 # https://github.com/vgteam/vg/issues/3303
 # -----------------------------------------------------------------------------
 
-echo "building GBZ from GFA - " $(date -u) >> ${LOGFILE}
+echo "building GBZ from GFA - " $(TZ=${ZONE} date) >> ${LOGFILE}
 if [ ! -f ${INDIR}/${GBZ} ]; then
 
 	if [ ${#REFARR[@]} -eq 1 ]; then
@@ -153,7 +153,7 @@ fi
 
 if [ ! -f ${INDIR}/${HAPL} ]; then
 
-	echo "${line[0]} - building giraffe indices - " $(date -u) >> ${LOGFILE}
+	echo "${line[0]} - building giraffe indices - " $(TZ=${ZONE} date) >> ${LOGFILE}
 	vg index \
 		--dist-name ${DIST} \
 		${GBZ}
@@ -183,13 +183,13 @@ if [ ! -f ${INDIR}/${HAPL} ]; then
 
 fi
 
-echo "${line[0]} - complete - " $(date -u) >> ${LOGFILE}
+echo "${line[0]} - complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 # -----------------------------------------------------------------------------
 # Collecting summary stats
 # -----------------------------------------------------------------------------
 
-echo "running summary scripts - " $(date -u) >> ${LOGFILE}
+echo "running summary scripts - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 ## Coverage of each sample X each chromosome in the graph
 cat $(find ${INDIR} -name "minigraph.split.log") > \
@@ -251,7 +251,7 @@ Rscript --vanilla \
 	${REF_DIR} \
 	${GRAPH_STATS_PLOTS}/${base}_chrom_coverage_graphic.pdf
 
-echo "complete - " $(date -u) >> ${LOGFILE}
+echo "complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 # -----------------------------------------------------------------------------
 # Clean up tmp dir

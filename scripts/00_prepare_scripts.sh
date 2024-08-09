@@ -165,6 +165,9 @@ done < ${FQ_LIST}
 # Set accessory script options
 # -----------------------------------------------------------------------------
 sed -i "s/pangenome_workflow/${WDNAME}/g" \
+${SCRIPT_DIR}/PREP_01_create_single_chrom_fastas.sh
+
+sed -i "s/pangenome_workflow/${WDNAME}/g" \
 ${SCRIPT_DIR}/accessory_functions/ACC_01_odgi_ad_hoc_plots.sh
 
 sed -i "s/pangenome_workflow/${WDNAME}/g" \

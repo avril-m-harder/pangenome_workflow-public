@@ -27,10 +27,10 @@ readonly CACTUS_SCRATCH=${TMP_DIR}/cactus-${RUN_ID}
 OUTDIR="${MC_OUT_DIR}/${RUN_ID}"
 mkdir -p ${OUTDIR}
 
-LOGFILE="${LOG_DIR}/01_minigraph-cactus_sCHROM_$(date +"%Y_%m_%d_%I_%M_%p").log"
+LOGFILE="${LOG_DIR}/01_minigraph-cactus_sCHROM_$(TZ=${ZONE} date +"%Y_%m_%d_%I_%M_%p").log"
 touch ${LOGFILE}
 
-echo "sCHROM - prepping for construction - " $(date -u) >> ${LOGFILE}
+echo "sCHROM - prepping for construction - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 ## not using the restart option unless really need to -- would work with tmp system
 # restart=''
@@ -53,13 +53,20 @@ sed -i 's/xCHROMx/sCHROM/g' sCHROM_file_copy.txt
 while read -a line
 do
 	cp ${line[0]} .
+	if [ "${line[0]}" == "*.gz"]; then
+		gunzip ${line[0]}
+	fi
 done < sCHROM_file_copy.txt
+
+if grep -q .fa.gz "sCHROM_file_copy.txt"; then
+	sed -i 's/.gz//g' sCHROM_seqfile.txt
+fi
 
 # -----------------------------------------------------------------------------
 # Run Minigraph-Cactus pangenome
 # -----------------------------------------------------------------------------
 
-echo "sCHROM - running minigraph-cactus graph construction - " $(date -u) >> ${LOGFILE}
+echo "sCHROM - running minigraph-cactus graph construction - " $(TZ=${ZONE} date) >> ${LOGFILE}
 apptainer exec --cleanenv \
   --overlay ${JOBSTORE_IMAGE} \
   --bind ${CACTUS_SCRATCH}/tmp:/tmp \
@@ -82,7 +89,7 @@ apptainer exec --cleanenv \
   	js \
   	sCHROM_seqfile.txt
 
-echo "sCHROM - graph construction complete - " $(date -u) >> ${LOGFILE}
+echo "sCHROM - graph construction complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 # -----------------------------------------------------------------------------
 # Viz with odgi
@@ -93,7 +100,7 @@ mamba activate ${MAMBA}/pg_tools
 cut -f 1 sCHROM_seqfile.txt > samp.list
 sed -e 's/$/#/' -i samp.list
 
-echo "sCHROM - starting odgi - " $(date -u) >> ${LOGFILE}
+echo "sCHROM - starting odgi - " $(TZ=${ZONE} date) >> ${LOGFILE}
 OG=$(find . -name "*.og")
 for OGFN in ${OG}
 do
@@ -132,7 +139,7 @@ do
 
 done
 
-echo "sCHROM - odgi complete - " $(date -u) >> ${LOGFILE}
+echo "sCHROM - odgi complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 mamba deactivate
 
 # -----------------------------------------------------------------------------

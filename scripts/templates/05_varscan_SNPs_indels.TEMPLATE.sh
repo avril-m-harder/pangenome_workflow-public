@@ -64,7 +64,7 @@ rsync -avuP ${FILTBAM} ${INDIR}
 # Prep reference and header info
 # -----------------------------------------------------------------------------
 
-echo "SAMP_NAME - prepping reference and VCF header info - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - prepping reference and VCF header info - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 samtools faidx ${REF_PATH_FA_BGZIP}
 
@@ -100,7 +100,7 @@ D8_VCF="${SAMP}_subgraph.giraffeBAM.d8.vcf.gz"
 # Generate pileup and call variants with varscan
 # -----------------------------------------------------------------------------
 
-echo "SAMP_NAME - generating mpileup - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - generating mpileup - " $(TZ=${ZONE} date) >> ${LOGFILE}
 samtools mpileup \
 	-d 500 \
 	-Q 20 \
@@ -108,7 +108,7 @@ samtools mpileup \
 	-o ${MPILEUP} \
 	${FILTBAM}
 
-echo "SAMP_NAME - calling variants - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - calling variants - " $(TZ=${ZONE} date) >> ${LOGFILE}
 varscan mpileup2cns \
 	${MPILEUP} \
 	--min-coverage 1 \
@@ -133,7 +133,7 @@ bcftools filter -i "$filt" ${FINAL_VCF} | bgzip -c -@ ${VARSCAN_NTHREADS} > ${D8
 # Clean up tmp dir
 # -----------------------------------------------------------------------------
 
-echo "SAMP_NAME - complete - " $(date -u) >> ${LOGFILE}
+echo "SAMP_NAME - complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 rsync -avuP ${FINAL_VCF} ${OUTDIR}
 rsync -avuP ${DEPTHFILT_VCF} ${OUTDIR}
