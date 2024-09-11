@@ -25,10 +25,10 @@ OUTDIR="${GIR_OUT_DIR}"
 
 GFA="mc_${TAXON}_all_chroms.gfa"
 GBZ="mc_${TAXON}_all_chroms.gfa.gbz"
-DIST="mc_${TAXON}_all_chroms.gfa.dist"
-RI="mc_${TAXON}_all_chroms.gfa.ri"
-MIN="mc_${TAXON}_all_chroms.gfa.min"
-HAPL="mc_${TAXON}_all_chroms.gfa.k${KLEN}.hapl"
+DIST="mc_${TAXON}_all_chroms.gfa.gbz.dist"
+RI="mc_${TAXON}_all_chroms.gfa.gbz.ri"
+MIN="mc_${TAXON}_all_chroms.gfa.gbz.min"
+HAPL="mc_${TAXON}_all_chroms.gfa.gbz.k${KLEN}.hapl"
 
 rsync -avuP ${INDIR}/${GFA}* .
 

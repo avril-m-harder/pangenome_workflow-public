@@ -181,6 +181,7 @@ do
 	fi
 
 done < node_coords.txt
+echo "" >> ${base}_breakpoint_coords.txt
 echo ">>> breakpoint coordinate calculation complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 # -----------------------------------------------------------------------------

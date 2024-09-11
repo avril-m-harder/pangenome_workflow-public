@@ -63,10 +63,10 @@ if [ $NCOLS -eq 3 ]; then
 		${TEMPLATE_DIR}/03_vg_giraffe-subgraph.TEMPLATE.sh > \
 		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
 		
-		sed -i "s/FQ_FILE_1/${line[1]}/g" \
+		sed -i "s|FQ_FILE_1|${line[1]}|g" \
 		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
 		
-		sed -i "s/FQ_FILE_2/${line[2]}/g" \
+		sed -i "s|FQ_FILE_2|${line[2]}|g" \
 		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
 	
 		sed -i "s/QUEUE03/${QUEUE_03}/g" \
@@ -91,7 +91,7 @@ elif [ $NCOLS -eq 2 ]; then
 		${TEMPLATE_DIR}/03_vg_giraffe-subgraph.TEMPLATE-INTERLEAVED.sh > \
 		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
 		
-		sed -i "s/FQ_FILE/${line[1]}/g" \
+		sed -i "s|FQ_FILE|${line[1]}|g" \
 		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
 	
 		sed -i "s/QUEUE03/${QUEUE_03}/g" \
