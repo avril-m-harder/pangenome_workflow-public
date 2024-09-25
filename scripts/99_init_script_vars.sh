@@ -63,11 +63,11 @@ MAMBA="/home/aharder/.conda/envs"
 # -----------------------------------------------------------------------------
 
 ## Cactus version and number of threads
-readonly CACTUS_IMAGE=docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.0
+readonly CACTUS_IMAGE=docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.1
 
 ## Files with sample info
-readonly SEQFILE="${INFO_DIR}/cactus_CHROM_seqfile_noJoelle.txt"
-readonly CPFILE="${INFO_DIR}/cactus_CHROM_file_copy_noJoelle.txt"
+readonly SEQFILE="${INFO_DIR}/cactus_CHROM_seqfile.txt"
+readonly CPFILE="${INFO_DIR}/cactus_CHROM_file_copy.txt"
 
 ## Set queue and number of threads
 QUEUE_01=all.q
@@ -92,10 +92,7 @@ PRIMREF=${REFARR[0]}
 ## ------------------------------------------------------
 
 ## Define chrom names
-# declare -a chroms=(Chr01 Chr02 Chr03 Chr04 Chr05 Chr06 Chr07 Chr08 Chr09 Chr10 Chr11 Chr12 Chr13 Chr14 Chr15 Chr16 Chr17 Chr18 Chr19 Chr20)
-
-### FOR TESTING ###
-declare -a chroms=(Chr04 Chr07 Chr08)
+declare -a chroms=(Chr01 Chr02 Chr03 Chr04 Chr05 Chr06 Chr07 Chr08 Chr09 Chr10 Chr11 Chr12 Chr13 Chr14 Chr15 Chr16 Chr17 Chr18 Chr19 Chr20)
 
 
 # -----------------------------------------------------------------------------

@@ -76,7 +76,6 @@ apptainer exec --cleanenv \
   	--workDir=cactus_wd \
   	--binariesMode local \
   	--reference ${REFSAMP} \
-  	--chop \
   	--vcf clip \
   	--giraffe clip \
   	--gfa clip \
