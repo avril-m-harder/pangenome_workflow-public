@@ -5,7 +5,7 @@
 #$ -V
 #$ -N cactus_sCHROM
 #$ -m ae
-#$ -M aharder@hudsonalpha.org
+#$ -M [email]
 
 
 source ~/.bashrc

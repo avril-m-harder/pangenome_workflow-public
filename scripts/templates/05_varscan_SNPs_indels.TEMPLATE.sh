@@ -5,7 +5,7 @@
 #$ -V
 #$ -N varscan_05_SAMP_NAME
 #$ -m ae
-#$ -M aharder@hudsonalpha.org
+#$ -M [email]
 
 source ~/.bashrc
 source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
