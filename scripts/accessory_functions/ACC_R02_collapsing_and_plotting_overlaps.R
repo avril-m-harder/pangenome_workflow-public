@@ -20,7 +20,7 @@ for(s in samps){
   samp <- s
   
   idx <- read.table(paste0(samp,'.genome'))
-  idx <- idx[grep('Chr', idx[,1]),]
+  idx <- idx[grep('scaffold', idx[,1], invert = TRUE),]
   tot.genom.len <- sum(as.numeric(idx$V2))
   
   for(t in c('repeats','genes')){

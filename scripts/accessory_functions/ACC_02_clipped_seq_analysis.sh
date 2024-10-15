@@ -76,7 +76,7 @@ do
 	REP_GFF_CHR="${BASE}.CHR_ONLY.gff3.gz"
 
 	gzip -cd ${REP_GFF} | \
-	grep "^Chr" | gzip -c > \
+	grep -v "^scaffold" | gzip -c > \
 	${REP_GFF_CHR}
 
 	bedtools intersect \
@@ -90,7 +90,7 @@ do
 	GEN_GFF_CHR="${BASE}.CHR_ONLY.gff3.gz"
 
 	gzip -cd ${GEN_GFF} | \
-	grep "^Chr" | gzip -c > \
+	grep -v "^scaffold" | gzip -c > \
 	${GEN_GFF_CHR}
 		
 	bedtools intersect \
