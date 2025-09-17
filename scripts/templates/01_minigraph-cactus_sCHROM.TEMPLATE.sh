@@ -52,9 +52,10 @@ sed -i 's/xCHROMx/sCHROM/g' sCHROM_file_copy.txt
 
 while read -a line
 do
-	cp ${line[0]} .
-	if [ "${line[0]}" == "*.gz"]; then
-		gunzip ${line[0]}
+	rsync -avuP ${line[0]} .
+	if [[ "${line[0]}" == *.gz ]]; then
+		FILE=$(basename ${line[0]})
+		gunzip ${FILE}
 	fi
 done < sCHROM_file_copy.txt
 

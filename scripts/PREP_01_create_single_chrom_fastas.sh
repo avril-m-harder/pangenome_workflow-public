@@ -5,17 +5,14 @@
 #$ -q all.q
 #$ -pe smp 2
 #$ -m ae
-#$ -M #######@hudsonalpha.org
+#$ -M [email]
 
 source ~/.bashrc
-source /home/#######_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
 
 TMP_DIR=`/bin/mktemp -d -p /mnt/data1/tmp`
 cd ${TMP_DIR}
 echo "${TMP_DIR}"
-
-MAMBA="/home/#######/.conda/envs"
-
 
 # -----------------------------------------------------------------------------
 # Copy assemblies to REF_DIR -- EDIT IF NECESSARY

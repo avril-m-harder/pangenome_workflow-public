@@ -55,7 +55,7 @@ ${NCOORDS_OUT}
 ## program directories
 STM_DIR="/home/aharder/bin/sequenceTubeMap/scripts"
 STMVIZ_DIR="/home/aharder_scratch_f13/seqTubeMap_input_data"
-MAMBA="/home/aharder/.conda/envs"
+MAMBA="/home/aharder_scratch_f13/.conda/envs"
 
 
 # -----------------------------------------------------------------------------

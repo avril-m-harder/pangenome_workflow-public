@@ -70,14 +70,15 @@ if [ ! -f ${KMC_OUT}/${KFF} ]; then
 
 	## if using hammer, ~7.8 Gb memory/CPU? 192 CPU, 1.5 Tb
 	echo "SAMP_NAME - counting ${KLEN}-mers - " $(TZ=${ZONE} date) >> ${LOGFILE}
-	kmc \
-		-k${KLEN} \
-		-m200 \
-		-okff \
-		-t${VG_GIR_NTHREADS} \
-		@files.lst \
-		${SAMP} \
-		.
+	apptainer exec ${KMCDOCK} \
+		kmc \
+			-k${KLEN} \
+			-m200 \
+			-okff \
+			-t${VG_GIR_NTHREADS} \
+			@files.lst \
+			${SAMP} \
+			.
 
 	rsync -avuP ${KFF} ${KMC_OUT}
 	
