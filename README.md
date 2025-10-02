@@ -21,7 +21,10 @@
 |   |____02_vg_combine_and_haplos.TEMPLATE.sh
 |   |____03_vg_giraffe-subgraph.TEMPLATE.sh
 |   |____03_vg_giraffe-subgraph.TEMPLATE-INTERLEAVED.sh
-|   |____04_vg_call_SVs.TEMPLATE.sh
+|   |____03_vg_giraffe-allhapsgraph.TEMPLATE.sh
+|   |____03_vg_giraffe-allhapsgraph.TEMPLATE-INTERLEAVED.sh
+|   |____04_vg_call-subgraph.SVs.TEMPLATE.sh
+|   |____04_vg_call-allhapsgraph.SVs.TEMPLATE.sh
 |   |____05_varscan_SNPs_indels.TEMPLATE.sh
 |
 |____ref_data
