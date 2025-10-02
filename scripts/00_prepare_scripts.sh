@@ -43,12 +43,23 @@ ${SCRIPT_DIR}/02_vg_combine_and_haplos.sh
 sed -i "s/pangenome_workflow/${WDNAME}/g" \
 ${SCRIPT_DIR}/02_vg_combine_and_haplos.sh
 
+if [ ${#REFARR[@]} -eq 1 ]; then
+	GFA="mc_${TAXON}_all_chroms.gfa"
+elif [ ${#REFARR[@]} -gt 1 ]; then
+	GFA="mc_${TAXON}_all_chroms_ALL_PATHS_AS_REFS.gfa"
+fi
+sed "s|xGFAx|${MC_OUT_DIR}\/${GFA}|g" ${INFO_DIR}/panacus_report_TEMPLATE.yaml > \
+${INFO_DIR}/panacus_report.yaml
+
 # -----------------------------------------------------------------------------
 # Set 03.sh vg giraffe options
 # -----------------------------------------------------------------------------
 ## Sample-level script directory
-VG_SAMP_SCRIPT_DIR="${SCRIPT_DIR}/03_vg_giraffe-subgraph_samp_scripts"
-mkdir -p ${VG_SAMP_SCRIPT_DIR}
+VG_SAMP_SCRIPT_DIR-SUB="${SCRIPT_DIR}/03_vg_giraffe-subgraph_samp_scripts"
+VG_SAMP_SCRIPT_DIR-ALL="${SCRIPT_DIR}/03_vg_giraffe-allhapsgraph_samp_scripts"
+
+mkdir -p ${VG_SAMP_SCRIPT_DIR-SUB}
+mkdir -p ${VG_SAMP_SCRIPT_DIR-ALL}
 
 ## prepare correct scripts depending on whether FASTQs are interleaved or not
 NCOLS=$(awk --field-separator="\t" "{ print NF }" ${FQ_LIST} | uniq)
@@ -61,22 +72,41 @@ if [ $NCOLS -eq 3 ]; then
 		
 		sed "s/SAMP_NAME/${line[0]}/g" \
 		${TEMPLATE_DIR}/03_vg_giraffe-subgraph.TEMPLATE.sh > \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 		
 		sed -i "s|FQ_FILE_1|${line[1]}|g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 		
 		sed -i "s|FQ_FILE_2|${line[2]}|g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 	
 		sed -i "s/QUEUE03/${QUEUE_03}/g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 	
 		sed -i "s/VGGIRNTHREADS/${VG_GIR_NTHREADS}/g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 		
 		sed -i "s/pangenome_workflow/${WDNAME}/g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
+		
+		sed "s/SAMP_NAME/${line[0]}/g" \
+		${TEMPLATE_DIR}/03_vg_giraffe-allhapsgraph.TEMPLATE.sh > \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+		
+		sed -i "s|FQ_FILE_1|${line[1]}|g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+		
+		sed -i "s|FQ_FILE_2|${line[2]}|g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+	
+		sed -i "s/QUEUE03/${QUEUE_03}/g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+	
+		sed -i "s/VGGIRNTHREADS/${VG_GIR_NTHREADS}/g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+		
+		sed -i "s/pangenome_workflow/${WDNAME}/g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
 	
 	done < ${FQ_LIST}
 
@@ -89,19 +119,35 @@ elif [ $NCOLS -eq 2 ]; then
 		
 		sed "s/SAMP_NAME/${line[0]}/g" \
 		${TEMPLATE_DIR}/03_vg_giraffe-subgraph.TEMPLATE-INTERLEAVED.sh > \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 		
 		sed -i "s|FQ_FILE|${line[1]}|g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 	
 		sed -i "s/QUEUE03/${QUEUE_03}/g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 	
 		sed -i "s/VGGIRNTHREADS/${VG_GIR_NTHREADS}/g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
 		
 		sed -i "s/pangenome_workflow/${WDNAME}/g" \
-		${VG_SAMP_SCRIPT_DIR}/03_vg_giraffe-subgraph_${line[0]}.sh
+		${VG_SAMP_SCRIPT_DIR-SUB}/03_vg_giraffe-subgraph_${line[0]}.sh
+
+		sed "s/SAMP_NAME/${line[0]}/g" \
+		${TEMPLATE_DIR}/03_vg_giraffe-allhapsgraph.TEMPLATE-INTERLEAVED.sh > \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+		
+		sed -i "s|FQ_FILE|${line[1]}|g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+	
+		sed -i "s/QUEUE03/${QUEUE_03}/g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+	
+		sed -i "s/VGGIRNTHREADS/${VG_GIR_NTHREADS}/g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
+		
+		sed -i "s/pangenome_workflow/${WDNAME}/g" \
+		${VG_SAMP_SCRIPT_DIR-ALL}/03_vg_giraffe-allhapsgraph_${line[0]}.sh
 	
 	done < ${FQ_LIST}
 	
@@ -114,24 +160,40 @@ fi
 # Set 04.sh vg call options
 # -----------------------------------------------------------------------------
 ## Sample-level script directory
-VG_CALL_SAMP_SCRIPT_DIR="${SCRIPT_DIR}/04_vg_call_SVs_samp_scripts"
-mkdir -p ${VG_CALL_SAMP_SCRIPT_DIR}
+VG_CALL_SAMP_SCRIPT_DIR-SUB="${SCRIPT_DIR}/04_vg_call_SVs-subgraph_samp_scripts"
+VG_CALL_SAMP_SCRIPT_DIR-ALL="${SCRIPT_DIR}/04_vg_call_SVs-allhapsgraph_samp_scripts"
+
+mkdir -p ${VG_CALL_SAMP_SCRIPT_DIR-SUB}
+mkdir -p ${VG_CALL_SAMP_SCRIPT_DIR-ALL}
 
 while read -a line
 do
 		
 	sed "s/SAMP_NAME/${line[0]}/g" \
-		${TEMPLATE_DIR}/04_vg_call_SVs.TEMPLATE.sh > \
-		${VG_CALL_SAMP_SCRIPT_DIR}/04_vg_call_SV_${line[0]}.sh
+		${TEMPLATE_DIR}/04_vg_call-allhapsgraph.SVs.TEMPLATE.sh > \
+		${VG_CALL_SAMP_SCRIPT_DIR-ALL}/04_vg_call_SV-allhapsgraph_${line[0]}.sh
 	
 	sed -i "s/QUEUE04/${QUEUE_04}/g" \
-	${VG_CALL_SAMP_SCRIPT_DIR}/04_vg_call_SV_${line[0]}.sh
+	${VG_CALL_SAMP_SCRIPT_DIR-ALL}/04_vg_call_SV-allhapsgraph_${line[0]}.sh
 	
 	sed -i "s/VGCALLNTHREADS/${VG_CALL_NTHREADS}/g" \
-	${VG_CALL_SAMP_SCRIPT_DIR}/04_vg_call_SV_${line[0]}.sh
+	${VG_CALL_SAMP_SCRIPT_DIR-ALL}/04_vg_call_SV-allhapsgraph_${line[0]}.sh
 	
 	sed -i "s/pangenome_workflow/${WDNAME}/g" \
-	${VG_CALL_SAMP_SCRIPT_DIR}/04_vg_call_SV_${line[0]}.sh
+	${VG_CALL_SAMP_SCRIPT_DIR-ALL}/04_vg_call_SV-allhapsgraph_${line[0]}.sh
+	
+	sed "s/SAMP_NAME/${line[0]}/g" \
+	${TEMPLATE_DIR}/04_vg_call-subgraph.SVs.TEMPLATE.sh > \
+	${VG_CALL_SAMP_SCRIPT_DIR-SUB}/04_vg_call_SV-subgraph_${line[0]}.sh
+	
+	sed -i "s/QUEUE04/${QUEUE_04}/g" \
+	${VG_CALL_SAMP_SCRIPT_DIR-SUB}/04_vg_call_SV-subgraph_${line[0]}.sh
+	
+	sed -i "s/VGCALLNTHREADS/${VG_CALL_NTHREADS}/g" \
+	${VG_CALL_SAMP_SCRIPT_DIR-SUB}/04_vg_call_SV-subgraph_${line[0]}.sh
+	
+	sed -i "s/pangenome_workflow/${WDNAME}/g" \
+	${VG_CALL_SAMP_SCRIPT_DIR-SUB}/04_vg_call_SV-subgraph_${line[0]}.sh
 		
 done < ${FQ_LIST}
 

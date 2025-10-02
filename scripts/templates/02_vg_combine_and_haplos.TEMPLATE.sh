@@ -29,22 +29,19 @@ elif [ ${#REFARR[@]} -gt 1 ]; then
 	GFA="mc_${TAXON}_all_chroms_ALL_PATHS_AS_REFS.gfa"
 fi
 
-if [ ${#REFARR[@]} -eq 1 ]; then
-	GBZ="mc_${TAXON}_all_chroms.gfa.gbz"
-elif [ ${#REFARR[@]} -gt 1 ]; then
-	TMP_GBZ="mc_${TAXON}_all_chroms_ALL_PATHS_AS_REFS.gfa.gbz"
-	GBZ="mc_${TAXON}_all_chroms.gfa.gbz"
-fi
-
-DIST="mc_${TAXON}_all_chroms.gfa.gbz.dist"
-RI="mc_${TAXON}_all_chroms.gfa.gbz.ri"
-MIN="mc_${TAXON}_all_chroms.gfa.gbz.min"
-HAPL="mc_${TAXON}_all_chroms.gfa.gbz.k${KLEN}.hapl"
-REF_PATH_FA_BGZIP="mc_${TAXON}_all_chroms_${PRIMREF}_path.fa.gz"
+XG="${GFA}.xg"
+GBZ="${GFA}.gbz"
+DIST="${GFA}.gbz.dist"
+RI="${GFA}.gbz.ri"
+MIN="${GFA}.gbz.min"
+HAPL="${GFA}.gbz.k${KLEN}.hapl"
+REF_PATH_FA_BGZIP="$(basename ${GFA} .gfa)_${PRIMREF}_path.fa.gz"
 
 
 mamba activate ${MAMBA}/pg_tools
 touch ${LOGFILE}
+echo "activating pg_tools environment - " $(TZ=${ZONE} date) >> ${LOGFILE}
+mamba list >> ${LOGFILE}
 
 # -----------------------------------------------------------------------------
 # Collect chrom-level VG files and merge
@@ -64,6 +61,7 @@ if [ ! -f ${INDIR}/${GFA} ]; then
 
 	ALLFNS=$( echo $(for CHROM in ${chroms[@]}; do echo "${TAXON}_${CHROM}.gfa"; done) )
 
+	apptainer exec ${VG_IMAGE} \
 	vg combine \
 		${ALLFNS} > \
 		${GFA}
@@ -81,24 +79,26 @@ fi
 
 # -----------------------------------------------------------------------------
 # Build GBZ from GFA and extract reference path for downstream apps
-# https://github.com/vgteam/vg/issues/3303
+# 
+# https://github.com/vgteam/vg/wiki/Haplotype-Sampling
 # -----------------------------------------------------------------------------
 
 echo "building GBZ from GFA - " $(TZ=${ZONE} date) >> ${LOGFILE}
 if [ ! -f ${INDIR}/${GBZ} ]; then
 
-	if [ ${#REFARR[@]} -eq 1 ]; then
-
+		apptainer exec ${VG_IMAGE} \
 		vg gbwt \
 			--gbz-format \
 			-g ${GBZ} \
 			-G ${GFA}
-
+			
+		apptainer exec ${VG_IMAGE} \
 		vg paths \
 			-x ${GBZ} \
 			-M > \
 			${GRAPH_STATS_DIR}/${GBZ}.pathstats.txt
 
+		apptainer exec ${VG_IMAGE} \
 		vg paths \
 			-x ${GBZ} \
 			--extract-fasta \
@@ -106,40 +106,16 @@ if [ ! -f ${INDIR}/${GBZ} ]; then
 			bgzip > \
 			${REF_PATH_FA_BGZIP}
 
-
-		${STM_DIR}/prepare_vg.sh ${GBZ}
+		apptainer exec ${VG_IMAGE} \
+		vg convert \
+			-g ${GFA} \
+			-x ${XG}
+		
+		rsync -avuP ${XG} ${INDIR}	
+		rsync -avuP ${XG} ${STMVIZ_DIR}	
 		rsync -avuP ${GBZ}* ${INDIR}
 		rsync -avuP ${GBZ}* ${STMVIZ_DIR}
 		rsync -avuP ${REF_PATH_FA} ${INDIR}
-
-	elif [ ${#REFARR[@]} -gt 1 ]; then
-
-		vg gbwt \
-			--gbz-format \
-			-g ${TMP_GBZ} \
-			-G ${GFA}
-
-		vg gbwt \
-			-Z \
-			--set-reference ${PRIMREF} \
-			--gbz-format \
-			-g ${GBZ} \
-			${TMP_GBZ}
-
-		vg paths \
-			-x ${GBZ} \
-			-M > \
-			${GRAPH_STATS_DIR}/${GBZ}.pathstats.txt
-
-		${STM_DIR}/prepare_vg.sh ${GBZ}
-		${STM_DIR}/prepare_vg.sh ${TMP_GBZ}
-		rsync -avuP ${GBZ}* ${INDIR}
-		rsync -avuP ${GBZ}* ${STMVIZ_DIR}
-		rsync -avuP ${TMP_GBZ}* ${INDIR}
-		rsync -avuP ${TMP_GBZ}* ${STMVIZ_DIR}
-		rsync -avuP ${REF_PATH_FA_BGZIP} ${INDIR}
-	
-	fi
 
 else
 	
@@ -154,20 +130,24 @@ fi
 if [ ! -f ${INDIR}/${HAPL} ]; then
 
 	echo "${line[0]} - building giraffe indices - " $(TZ=${ZONE} date) >> ${LOGFILE}
+	apptainer exec ${VG_IMAGE} \
 	vg index \
 		--dist-name ${DIST} \
 		${GBZ}
 
+	apptainer exec ${VG_IMAGE} \
 	vg gbwt \
 		--gbz-input ${GBZ} \
 		--r-index ${RI}
 
+	apptainer exec ${VG_IMAGE} \
 	vg minimizer \
 		-d ${DIST} \
 		-t ${VG_HAP_NTHREADS} \
 		-o ${MIN} \
 		${GBZ}
 		
+	apptainer exec ${VG_IMAGE} \
 	vg haplotypes \
 		--distance-index ${DIST} \
 		--r-index ${RI} \
@@ -186,7 +166,7 @@ fi
 echo "${line[0]} - complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 # -----------------------------------------------------------------------------
-# Collecting summary stats
+# Collecting summary stats + making some plots
 # -----------------------------------------------------------------------------
 
 echo "running summary scripts - " $(TZ=${ZONE} date) >> ${LOGFILE}
@@ -200,54 +180,23 @@ Rscript --vanilla \
 	${GRAPH_STATS_DIR}/minigraph_split_logs.txt \
 	${GRAPH_STATS_PLOTS}/${TAXON}_chrom_coverage_plots.pdf
 	
-## Panacus plots: node coverage and graph growth with added samples
+## Panacus plots: can be customized by editing ${INFO_DIR}/panacus_report.yaml
 base=$(basename ${GFA} .gfa)
+
+panacus report \
+	${INFO_DIR}/panacus_report.yaml > \
+	${GRAPH_STATS_PLOTS}/${BASE}_panacus_report.html
 
 grep -e '^W' ${GFA} | \
 cut -f2-6 | \
 awk '{ print $1 "#" $2 "#" $3 ":" $4 "-" $5 }' > \
 ${base}.paths.txt
 
-# grep -ve '${REFSAMP}' ${base}.paths.txt > \
-# ${base}.paths.haplotypes.txt
-cp ${base}.paths.txt ${base}.paths.haplotypes.txt
-
-if [ ! -f ${GRAPH_STATS_PLOTS}/panacus_${base}.histgrowth.node.pdf ]; then
-	RUST_LOG=info panacus histgrowth \
-		-t${VG_HAP_NTHREADS} \
-		-l 1,2,1,1,1 \
-		-q 0,0,1,0.5,0.1 \
-		-S \
-		-a \
-		-s ${base}.paths.haplotypes.txt \
-		-c all \
-		${GFA} > \
-		${base}.histgrowth.node.tsv
-
-	panacus-visualize \
-		-e ${base}.histgrowth.node.tsv \
-		> ${GRAPH_STATS_PLOTS}/panacus_${base}.histgrowth.node.pdf
-fi
-
-if [ ! ${GRAPH_STATS_PLOTS}/panacus_${base}.histgrowth.html ]; then
-	RUST_LOG=info panacus histgrowth \
-		-t${VG_HAP_NTHREADS} \
-		-l 1,2,1,1,1 \
-		-q 0,0,1,0.5,0.1 \
-		-S \
-		-s ${base}.paths.haplotypes.txt \
-		-c all \
-		-a \
-		-o html \
-		${GFA} > \
-		${GRAPH_STATS_PLOTS}/panacus_${base}.histgrowth.html
-fi
-
 ## Plotting coverage of samples x chromosomes by representation in the 
 ## final (clipped) graph
 Rscript --vanilla \
 	${SCRIPT_DIR}/R02_chrom_coverage_graphics.R \
-	./${base}.paths.haplotypes.txt \
+	./${base}.paths.txt \
 	${REF_DIR} \
 	${GRAPH_STATS_PLOTS}/${base}_chrom_coverage_graphic.pdf
 

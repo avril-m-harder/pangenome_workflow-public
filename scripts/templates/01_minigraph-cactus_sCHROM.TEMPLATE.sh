@@ -76,14 +76,14 @@ apptainer exec --cleanenv \
   cactus-pangenome \
   	--workDir=cactus_wd \
   	--binariesMode local \
+  	--maxCores MCNTHREADS \
   	--reference ${REFSAMP} \
-  	--vcf clip \
-  	--giraffe clip \
-  	--gfa clip \
-  	--gbz full clip \
+  	--gfa full clip \
+  	--unchopped-gfa full clip \
   	--xg clip \
-  	--chrom-vg clip \
-  	--chrom-og full clip \
+	--odgi full clip \
+  	--vcf clip \
+  	--vcfwave \
   	--outDir ${RUN_ID} \
   	--outName ${RUN_ID} \
   	js \
@@ -96,6 +96,8 @@ echo "sCHROM - graph construction complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 # -----------------------------------------------------------------------------
 
 mamba activate ${MAMBA}/pg_tools
+echo "activating pg_tools environment - " $(TZ=${ZONE} date) >> ${LOGFILE}
+mamba list >> ${LOGFILE}
 
 cut -f 1 sCHROM_seqfile.txt > samp.list
 sed -e 's/$/#/' -i samp.list
@@ -123,7 +125,8 @@ do
 		-i ${SORTOG} \
 		--threads ${MC_NTHREADS} \
 		-o ${PNG}
-		
+	
+	
 	odgi viz \
 		-i ${SORTOG} \
 		--threads ${MC_NTHREADS} \

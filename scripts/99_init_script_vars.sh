@@ -63,16 +63,15 @@ MAMBA="/home/aharder_scratch_f13/.conda/envs"
 # -----------------------------------------------------------------------------
 
 ## Cactus version and number of threads
-readonly CACTUS_IMAGE=docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.1
+readonly CACTUS_IMAGE=docker://quay.io/comparative-genomics-toolkit/cactus:v3.0.0
 
 ## Files with sample info
 readonly SEQFILE="${INFO_DIR}/cactus_CHROM_seqfile.txt"
 readonly CPFILE="${INFO_DIR}/cactus_CHROM_file_copy.txt"
 
 ## Set queue and number of threads
-QUEUE_01=all.q
+QUEUE_01=hammer.q
 MC_NTHREADS=32
-
 
 ## Set reference sample -- 2 options here: --------------
 
@@ -80,24 +79,27 @@ MC_NTHREADS=32
 ##				 haplotype/sequence in the list will be the primary reference included in
 ##				 all subgraphs, but only the number of haplotypes set below for 03.sh will
 ##				 be included as additional paths in subgraphs.
-# REFSAMP=$(awk '{print $1}' ${SEQFILE})
-# declare -a REFARR=( $(awk '{print $1}' ${SEQFILE}) )
-# PRIMREF=${REFARR[0]}
+REFSAMP=$(awk '{print $1}' ${SEQFILE})
+declare -a REFARR=( $(awk '{print $1}' ${SEQFILE}) )
+PRIMREF=${REFARR[0]}
 
 ## >>> Option 2: Set a single input haplotype as a reference path in the full graph (this
 ##				 will also be the primary reference included in all subgraphs).
-REFARR=("CsativaPrytzh")
-REFSAMP=${REFARR[0]}
-PRIMREF=${REFARR[0]}
+##				 Gotta match something in the first column of the SEQFILE.
+# REFARR=("CsativaPrytzh")
+# REFSAMP=${REFARR[0]}
+# PRIMREF=${REFARR[0]}
 ## ------------------------------------------------------
 
 ## Define chrom names
-declare -a chroms=(Chr01 Chr02 Chr03 Chr04 Chr05 Chr06 Chr07 Chr08 Chr09 Chr10 Chr11 Chr12 Chr13 Chr14 Chr15 Chr16 Chr17 Chr18 Chr19 Chr20)
-
+declare -a chroms=(Chr01 Chr02)
 
 # -----------------------------------------------------------------------------
 # Set 02.sh vg haplotype options
 # -----------------------------------------------------------------------------
+
+## Set version of vg to use (docker updated with every release)
+readonly VG_IMAGE=docker://quay.io/vgteam/vg:v1.68.0
 
 ## Set number of threads and queue and edit script header
 VG_HAP_NTHREADS=32
@@ -119,13 +121,10 @@ VG_GIR_NTHREADS=32
 QUEUE_03=all.q
 
 ## Set number of haplotypes to include in each subgraph
-NHAPLOS=6
-
-## Set version of KMC to use
-KMCDOCK="docker://gregorysprenger/kmc:v3.2.2"
+NHAPLOS=8
 
 ## Set list of FASTQ files for samples (must be .gz, not .bz2)
-FQ_LIST="${INFO_DIR}/noJoelle_fq_list.txt"
+FQ_LIST="${INFO_DIR}/fq_list.txt"
 
 
 # -----------------------------------------------------------------------------

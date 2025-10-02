@@ -19,12 +19,20 @@ echo "${TMP_DIR}"
 # Activate env if necessary, set variable names
 # -----------------------------------------------------------------------------
 
-mamba activate ${MAMBA}/bioinfo_tools
+mamba activate ${MAMBA}/pg_tools
+echo "activating pg_tools environment - " $(TZ=${ZONE} date) >> ${LOGFILE}
+mamba list >> ${LOGFILE}
 
 INDIR="${GIR_OUT_DIR}"
 OUTDIR="${VARSCAN_OUT_DIR}"
 
-REF_PATH_FA_BGZIP="mc_${TAXON}_all_chroms_${PRIMREF}_path.fa.gz"
+if [ ${#REFARR[@]} -eq 1 ]; then
+	GFA="mc_${TAXON}_all_chroms.gfa"
+elif [ ${#REFARR[@]} -gt 1 ]; then
+	GFA="mc_${TAXON}_all_chroms_ALL_PATHS_AS_REFS.gfa"
+fi
+REF_PATH_FA_BGZIP="$(basename ${GFA} .gfa)_${PRIMREF}_path.fa.gz"
+
 SAMP="SAMP_NAME_k${KLEN}"
 SORTBAM="${SAMP}_subgraph.sorted.bam"
 DEDUPBAM="${SAMP}_subgraph.sorted.dedup.bam"

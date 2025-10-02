@@ -36,117 +36,25 @@ GBZ="${GFA}.gbz"
 DIST="${GFA}.gbz.dist"
 RI="${GFA}.gbz.ri"
 MIN="${GFA}.gbz.min"
-HAPL="${GFA}.gbz.k${KLEN}.hapl"
 
 rsync -avuP ${INDIR}/${GFA}* .
 
-# -----------------------------------------------------------------------------
-# Sample haplotypes based on kmer counts
-# -----------------------------------------------------------------------------
+SAMP="SAMP_NAME"
+GAM="${SAMP}_allhapsgraph.gam"
+BAM="${SAMP}_allhapsgraph.bam"
+SORTGAM="${SAMP}_allhapsgraph.sorted.gam"
+SORTBAM="${SAMP}_allhapsgraph.sorted.bam"
+DEDUPBAM="${SAMP}_allhapsgraph.sorted.dedup.bam"
+STATS="dup_metrics_${SAMP}_allhapsgraph_giraffeBAM.txt"
 
-SAMP="SAMP_NAME_k${KLEN}"
-SUBGBZ="mc_${TAXON}_all_chroms.gfa.${SAMP}.subgraph.gbz"
-GAM="${SAMP}_subgraph.gam"
-BAM="${SAMP}_subgraph.bam"
-SORTGAM="${SAMP}_subgraph.sorted.gam"
-SORTBAM="${SAMP}_subgraph.sorted.bam"
-DEDUPBAM="${SAMP}_subgraph.sorted.dedup.bam"
-STATS="dup_metrics_${SAMP}_subgraph_giraffeBAM.txt"
-KFF="${SAMP}.kff"
-
-LOGFILE="${LOG_DIR}/03_giraffe_${SAMP}_$(date +"%Y_%m_%d_%I_%M_%p").log"
+LOGFILE="${LOG_DIR}/03_giraffe_allhapsgraph_${SAMP}_$(date +"%Y_%m_%d_%I_%M_%p").log"
 touch ${LOGFILE}
 
-## count k-mers of various lengths in sample reads
-if [ ! -f ${KMC_OUT}/${KFF} ]; then
-
-	rsync -LvP FQ_FILE_1 .
-	rsync -LvP FQ_FILE_2 .
-
-	FQ1=$(ls ./*R1*fastq*)
-	FQ2=$(ls ./*R2*fastq*)
-
-	if [[ ${FQ1} == *.bz2 ]]; then
-		bzip2 -d ${FQ1}
-		bzip2 -d ${FQ2}
-		FQ1=$(basename ${FQ1} .bz2)
-		FQ2=$(basename ${FQ2} .bz2)
-	fi
-
-	echo ${FQ1} >> files.lst
-	echo ${FQ2} >> files.lst
-
-	## if using hammer, ~7.8 Gb memory/CPU? 192 CPU, 1.5 Tb
-	echo "SAMP_NAME - counting ${KLEN}-mers - " $(TZ=${ZONE} date) >> ${LOGFILE}
-	kmc \
-		-k${KLEN} \
-		-m200 \
-		-okff \
-		-t${VG_GIR_NTHREADS} \
-		@files.lst \
-		${SAMP} \
-		.
-
-	rsync -avuP ${KFF} ${KMC_OUT}
-	
-else
-	
-	rsync -avuP ${KMC_OUT}/${KFF} .
-
-fi
-
-
-## sample haplotypes to build subgraph
-echo "SAMP_NAME - haplotype sampling k=${KLEN} to build subgraph - " $(TZ=${ZONE} date) >> ${LOGFILE}
-
-if [ ! -f ${OUTDIR}/${SUBGBZ} ]; then
-
-	if [ ${#REFARR[@]} -eq 1 ]; then
-
-		apptainer exec ${VG_IMAGE} \
-		vg haplotypes \
-			--threads ${VG_GIR_NTHREADS} \
-			--include-reference \
-			--haplotype-input ${HAPL} \
-			--kmer-input ${KFF} \
-			--kmer-length ${KLEN} \
-			--num-haplotypes ${NHAPLOS} \
-			--verbosity 2 \
-			--subchain-length ${CHAINLEN} \
-			-g ${SUBGBZ} \
-			${GBZ}
-			
-	elif [ ${#REFARR[@]} -gt 1 ]; then
-	
-		apptainer exec ${VG_IMAGE} \
-		vg haplotypes \
-			--threads ${VG_GIR_NTHREADS} \
-			--haplotype-input ${HAPL} \
-			--kmer-input ${KFF} \
-			--kmer-length ${KLEN} \
-			--num-haplotypes ${NHAPLOS} \
-			--verbosity 2 \
-			--subchain-length ${CHAINLEN} \
-			-g ${SUBGBZ} \
-			${GBZ}
-			
-	fi
-		
-	echo "SAMP_NAME - preparing sTM index for subgraph GBZ - " $(TZ=${ZONE} date) >> ${LOGFILE}
-	${STM_DIR}/prepare_vg.sh ${SUBGBZ}
-	rsync -avuP ${SUBGBZ}* ${STMVIZ_DIR}
-	rsync -avuP ${SUBGBZ}* ${OUTDIR}
-else
-	rsync -avuP ${OUTDIR}/${SUBGBZ}* .
-fi
-
-
-
 # -----------------------------------------------------------------------------
-# Map short reads to haplotype-sampled graph file - for SV calling
+# Map short reads to graph with all haplotypes - for SV calling
 # ----------------------------------------------------------------------------- 
 
-echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> GAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
+echo "SAMP_NAME - mapping to allhapsgraph k=${KLEN} -> GAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 
@@ -169,9 +77,10 @@ if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 
 	apptainer exec ${VG_IMAGE} \
 	vg giraffe \
-		-Z ${SUBGBZ} \
+		-Z ${GBZ} \
 		--fastq-in ${FQ1} \
 		--fastq-in ${FQ2} \
+		--interleaved \
 		--max-multimaps 1 \
 		-o gam \
 		--sample SAMP_NAME_k${KLEN} \
@@ -179,7 +88,7 @@ if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 		--progress > \
 		${GAM}
 
-	echo "SAMP_NAME - preparing sTM index for subgraph GAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
+	echo "SAMP_NAME - preparing sTM index for allhapsgraph GAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 	apptainer exec ${VG_IMAGE} \
 	vg gamsort \
@@ -196,7 +105,7 @@ if [ ! -f ${OUTDIR}/${SORTGAM} ]; then
 
 	vg stats \
 		-a ${SORTGAM} \
-		${SUBGBZ} > \
+		${GBZ} > \
 		${GIR_STATS_DIR}/${SORTGAM}_stats.txt
 		
 else
@@ -207,43 +116,54 @@ fi
 
 
 # -----------------------------------------------------------------------------
-# Map short reads to haplotype-sampled graph file --> BAM - for SNP calling
+# Map short reads to graph with all haplotypes --> BAM - for SNP calling
 # ----------------------------------------------------------------------------- 
 
-echo "SAMP_NAME - mapping to subgraph k=${KLEN} -> BAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
+echo "SAMP_NAME - mapping to allhapsgraph k=${KLEN} -> BAM - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
 
 if [ ! -f ${OUTDIR}/${SORTBAM} ]; then
 
-	if [ -z "${FQ1}" ]; then
-
-		rsync -LvP FQ_FILE_1 .
-		rsync -LvP FQ_FILE_2 .
-
-		FQ1=$(ls ./*R1*fastq*)
-		FQ2=$(ls ./*R2*fastq*)
-
-		if [[ ${FQ1} == *.bz2 ]]; then
-			bzip2 -d ${FQ1}
-			bzip2 -d ${FQ2}
-			FQ1=$(basename ${FQ1} .bz2)
-			FQ2=$(basename ${FQ2} .bz2)
-		fi
-
-	fi
+## replacing the below section with vg surject - keeping in case that doesn't work
+# 	if [ -z "${FQ1}" ]; then
+# 
+# 		rsync -LvP FQ_FILE_1 .
+# 		rsync -LvP FQ_FILE_2 .
+# 
+# 		FQ1=$(ls ./*R1*fastq*)
+# 		FQ2=$(ls ./*R2*fastq*)
+# 
+# 		if [[ ${FQ1} == *.bz2 ]]; then
+# 			bzip2 -d ${FQ1}
+# 			bzip2 -d ${FQ2}
+# 			FQ1=$(basename ${FQ1} .bz2)
+# 			FQ2=$(basename ${FQ2} .bz2)
+# 		fi
+# 
+# 	fi
+# 
+# 	apptainer exec ${VG_IMAGE} \
+# 	vg giraffe \
+# 		-Z ${GBZ} \
+# 		--fastq-in ${FQ1} \
+# 		--fastq-in ${FQ2} \
+# 		--max-multimaps 1 \
+# 		-o BAM \
+# 		--sample SAMP_NAME_k${KLEN} \
+# 		--threads ${VG_GIR_NTHREADS} \
+# 		--progress > \
+# 		${BAM}
 
 	apptainer exec ${VG_IMAGE} \
-	vg giraffe \
-		-Z ${SUBGBZ} \
-		--fastq-in ${FQ1} \
-		--fastq-in ${FQ2} \
-		--max-multimaps 1 \
-		-o BAM \
-		--sample SAMP_NAME_k${KLEN} \
+	vg surject \
 		--threads ${VG_GIR_NTHREADS} \
-		--progress > \
+		-x ${XG} \
+		--interleaved \
+		--progress \
+		--bam-output \
+		${SORTGAM} > \
 		${BAM}
-
+	
 	samtools sort \
 		--threads $((${VG_GIR_NTHREADS}-1)) \
 		${BAM} > \
@@ -292,7 +212,7 @@ echo "SAMP_NAME - complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 # Clean up tmp dir
 # -----------------------------------------------------------------------------
 
-rsync -avuP *subgraph* ${OUTDIR}
+rsync -avuP *allhapsgraph* ${OUTDIR}
 cd ${OUTDIR}
 rm -rf ${TMP_DIR}
 
