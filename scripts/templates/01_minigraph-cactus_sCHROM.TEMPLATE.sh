@@ -29,6 +29,7 @@ mkdir -p ${OUTDIR}
 
 LOGFILE="${LOG_DIR}/01_minigraph-cactus_sCHROM_$(TZ=${ZONE} date +"%Y_%m_%d_%I_%M_%p").log"
 touch ${LOGFILE}
+echo "Cactus version:  ${CACTUS_IMAGE}" >> ${LOGFILE}
 
 echo "sCHROM - prepping for construction - " $(TZ=${ZONE} date) >> ${LOGFILE}
 
@@ -149,37 +150,62 @@ mamba deactivate
 # Analysis of chrom-level sequences + graph with PG-SCUnK
 # -----------------------------------------------------------------------------
 
-# mamba activate ${MAMBA}/pg-scunk
-# echo "activating pg-scunk environment - " $(TZ=${ZONE} date) >> ${LOGFILE}
-# mamba list >> ${LOGFILE}
-# 
-# FA_DIR="./${RUN_ID}/chrom-subproblems/sCHROM/fasta/"
-# for FILE in $(ls ${FA_DIR}/*.fa)
-# do
-# 	BASE=$(basename ${FILE} .fa)
-# 	mv ${FA_DIR}/${BASE}.fa ${FA_DIR}/${BASE}.fasta
-# done
-# 
-# GFA="${RUN_ID}.gfa.gz"
-# ${PGSCUNK} \
-# 	-p ${GFA} \
-# 	-a ${FA_DIR} \
-# 	-o pgscunk_Chr05_minigraphcactus-full \
-# 	-t ./TEMP/ \
-# 	-k 100
+mamba activate ${MAMBA}/pg-scunk
+echo "activating pg-scunk environment + prepping files - " $(TZ=${ZONE} date) >> ${LOGFILE}
+mamba list >> ${LOGFILE}
 
+FA_DIR="tmp_fa_dir"
+mkdir -p ${FA_DIR}
+mv *.fa ${FA_DIR}
+for FILE in $(ls ${FA_DIR}/*.fa)
+do
+	BASE=$(basename ${FILE} .fa)
+	mv ${FA_DIR}/${BASE}.fa ${FA_DIR}/${BASE}.fasta
+done
+
+FULL_GFA="${RUN_ID}.full.gfa"
+CLIP_GFA="${RUN_ID}.gfa"
+
+gunzip ${RUN_ID}/${FULL_GFA}.gz
+gunzip ${RUN_ID}/${CLIP_GFA}.gz
+
+${PGSCUNK} \
+	-p ${RUN_ID}/${FULL_GFA} \
+	-a ${FA_DIR} \
+	-o pgscunk_${RUN_ID}-full \
+	-t ./TEMP/ \
+	-k 81
+
+${PGSCUNK} \
+	-p ${RUN_ID}/${CLIP_GFA} \
+	-a ${FA_DIR} \
+	-o pgscunk_${RUN_ID}-clip \
+	-t ./TEMP/ \
+	-k 81
+
+gzip ${RUN_ID}/${FULL_GFA}
+gzip ${RUN_ID}/${CLIP_GFA}
+
+echo "pg-scunk complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
+
+mamba deactivate
 
 # -----------------------------------------------------------------------------
 # Clean up tmp dir
 # -----------------------------------------------------------------------------
 rm *.list
-rm *.fa
-rm *.fa.gz
+# rm *.fa
+# rm *.fa.gz
+rm -rf ./TEMP/
+rm -rf ./tmp_fa_dir/
 rm *.img
 rm sCHROM_seqfile.txt
 rm sCHROM_file_copy.txt
 rsync -avuP *.png ${ODGI_OUT}
 rm *.png
+rsync -avuP pgscunk_* ${PGSCUNK_OUT}
+rm pgscunk_*
+mv *.og ${RUN_ID}
 rsync -avuP $TMP_DIR/* ${OUTDIR}
 
 cd ${OUTDIR}
