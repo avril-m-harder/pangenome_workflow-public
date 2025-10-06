@@ -6,12 +6,12 @@
 # pangenome graph workflow. It should be included in all scripts for each step of
 # the workflow. Put the following line in the scripts:
 #
-#     source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+#     source /home/######/pangenome_workflow/scripts/99_init_script_vars.sh
 #
 
 ## Set main project directory
 WDNAME="pangenome_workflow"
-WORKDIR="/home/aharder_scratch_f13/${WDNAME}"
+WORKDIR="/home/######/${WDNAME}"
 
 ## Set taxon name (can be anything useful for ID)
 TAXON="camelinaTEST"
@@ -56,8 +56,8 @@ ${NCOORDS_OUT} ${PANKMER_OUT} ${PGSCUNK_OUT}
 
 ## program directories
 STM_DIR="/home/aharder/bin/sequenceTubeMap/scripts"
-STMVIZ_DIR="/home/aharder_scratch_f13/seqTubeMap_input_data"
-MAMBA="/home/aharder_scratch_f13/.conda/envs"
+STMVIZ_DIR="/home/######/seqTubeMap_input_data"
+MAMBA="/home/######/.conda/envs"
 
 
 # -----------------------------------------------------------------------------

@@ -32,6 +32,6 @@ do
 
 done
 	
-rsync -avuP *.xg /home/aharder_scratch_f13/seqTubeMap_input_data/
+rsync -avuP *.xg /home/######/seqTubeMap_input_data/
 
 mamba deactivate

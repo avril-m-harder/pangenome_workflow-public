@@ -9,7 +9,7 @@
 
 
 source ~/.bashrc
-source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+source /home/######/pangenome_workflow/scripts/99_init_script_vars.sh
 
 ## create temp directory and echo path to .o file
 TMP_DIR=`/bin/mktemp -d -p /mnt/data1/tmp`

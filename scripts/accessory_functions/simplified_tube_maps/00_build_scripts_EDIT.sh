@@ -13,7 +13,7 @@ START=75097270
 END=75132500
 MIN_L=5000
 MIN_KB=$((MIN_L/1000))
-REF_SEQ="/home/aharder_scratch_f13/sorghum_pangenome/ref_data/Sorghum_bicolor_var_BTx623.${CHROM}.fa"
+REF_SEQ="/home/######/sorghum_pangenome/ref_data/Sorghum_bicolor_var_BTx623.${CHROM}.fa"
 
 ## name files according to ROI or coordinates
 # REGION="${TAXON}_${CHROM}_${START}-${END}"

@@ -8,7 +8,7 @@
 #$ -M [email]
 
 source ~/.bashrc
-source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh
+source /home/######/pangenome_workflow/scripts/99_init_script_vars.sh
 
 TMP_DIR=`/bin/mktemp -d -p /mnt/data1/tmp`
 cd ${TMP_DIR}

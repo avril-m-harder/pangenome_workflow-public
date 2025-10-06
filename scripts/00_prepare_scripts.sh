@@ -3,7 +3,7 @@
 # prepare_scripts.sh
 #
 
-source /home/aharder_scratch_f13/pangenome_workflow/scripts/99_init_script_vars.sh 
+source /home/######/pangenome_workflow/scripts/99_init_script_vars.sh 
 
 # -----------------------------------------------------------------------------
 # Set 01.sh Minigraph-Cactus options
