@@ -37,7 +37,7 @@
 1. add reference FASTA and read FASTQ files (if aligning reads to graph) to appropriate dirs
 2. update /info/fq_list.txt (if aligning reads) and /info/cactus*.txt (necessary for graph building) files
 3. update 00.sh and 99.sh as necessary
-*in addition to conda env creation, PG-SCUnK needs to be installed: https://github.com/cumtr/PG-SCUnK/
+   *in addition to conda env creation, [PG-SCUnK](https://github.com/cumtr/PG-SCUnK/) needs to be installed
 4. edit and run PREP_01.sh as necessary to split genome FASTAs into chromosome FASTAs
 5. run 00.sh
 6. qsub each 01.sh script, run rest of numbered bash jobs in order as previous steps finish
