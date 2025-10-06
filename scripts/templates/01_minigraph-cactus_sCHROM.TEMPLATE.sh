@@ -146,6 +146,30 @@ echo "sCHROM - odgi complete - " $(TZ=${ZONE} date) >> ${LOGFILE}
 mamba deactivate
 
 # -----------------------------------------------------------------------------
+# Analysis of chrom-level sequences + graph with PG-SCUnK
+# -----------------------------------------------------------------------------
+
+# mamba activate ${MAMBA}/pg-scunk
+# echo "activating pg-scunk environment - " $(TZ=${ZONE} date) >> ${LOGFILE}
+# mamba list >> ${LOGFILE}
+# 
+# FA_DIR="./${RUN_ID}/chrom-subproblems/sCHROM/fasta/"
+# for FILE in $(ls ${FA_DIR}/*.fa)
+# do
+# 	BASE=$(basename ${FILE} .fa)
+# 	mv ${FA_DIR}/${BASE}.fa ${FA_DIR}/${BASE}.fasta
+# done
+# 
+# GFA="${RUN_ID}.gfa.gz"
+# ${PGSCUNK} \
+# 	-p ${GFA} \
+# 	-a ${FA_DIR} \
+# 	-o pgscunk_Chr05_minigraphcactus-full \
+# 	-t ./TEMP/ \
+# 	-k 100
+
+
+# -----------------------------------------------------------------------------
 # Clean up tmp dir
 # -----------------------------------------------------------------------------
 rm *.list

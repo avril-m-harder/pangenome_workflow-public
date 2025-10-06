@@ -21,10 +21,7 @@
 |   |____02_vg_combine_and_haplos.TEMPLATE.sh
 |   |____03_vg_giraffe-subgraph.TEMPLATE.sh
 |   |____03_vg_giraffe-subgraph.TEMPLATE-INTERLEAVED.sh
-|   |____03_vg_giraffe-allhapsgraph.TEMPLATE.sh
-|   |____03_vg_giraffe-allhapsgraph.TEMPLATE-INTERLEAVED.sh
-|   |____04_vg_call-subgraph.SVs.TEMPLATE.sh
-|   |____04_vg_call-allhapsgraph.SVs.TEMPLATE.sh
+|   |____04_vg_call_SVs.TEMPLATE.sh
 |   |____05_varscan_SNPs_indels.TEMPLATE.sh
 |
 |____ref_data
@@ -39,9 +36,10 @@
 ### Order of operations:
 1. add reference FASTA and read FASTQ files (if aligning reads to graph) to appropriate dirs
 2. update /info/fq_list.txt (if aligning reads) and /info/cactus*.txt (necessary for graph building) files
-3. update 00_prepare_scripts.sh and 99.sh as necessary
+3. update 00.sh and 99.sh as necessary
+*in addition to conda env creation, PG-SCUnK needs to be installed: https://github.com/cumtr/PG-SCUnK/
 4. edit and run PREP_01.sh as necessary to split genome FASTAs into chromosome FASTAs
-5. run 00_prepare_scripts.sh (and 00_env_build.sh if necessary to build conda env)
+5. run 00.sh
 6. qsub each 01.sh script, run rest of numbered bash jobs in order as previous steps finish
 
 
