@@ -86,18 +86,22 @@ fi
 echo "building GBZ from GFA - " $(TZ=${ZONE} date) >> ${LOGFILE}
 if [ ! -f ${INDIR}/${GBZ} ]; then
 
+
+		## writes GBZ from GFA
 		apptainer exec ${VG_IMAGE} \
 		vg gbwt \
 			--gbz-format \
 			-g ${GBZ} \
 			-G ${GFA}
-			
+		
+		## writes path metadata to text file
 		apptainer exec ${VG_IMAGE} \
 		vg paths \
 			-x ${GBZ} \
 			-M > \
 			${GRAPH_STATS_DIR}/${GBZ}.pathstats.txt
 
+		## writes reference path as FASTA
 		apptainer exec ${VG_IMAGE} \
 		vg paths \
 			-x ${GBZ} \
@@ -106,6 +110,7 @@ if [ ! -f ${INDIR}/${GBZ} ]; then
 			bgzip > \
 			${REF_PATH_FA_BGZIP}
 
+		## writes XG from GFA
 		apptainer exec ${VG_IMAGE} \
 		vg convert \
 			-g ${GFA} \
@@ -114,7 +119,6 @@ if [ ! -f ${INDIR}/${GBZ} ]; then
 		rsync -avuP ${XG} ${INDIR}	
 		rsync -avuP ${XG} ${STMVIZ_DIR}	
 		rsync -avuP ${GBZ}* ${INDIR}
-		rsync -avuP ${GBZ}* ${STMVIZ_DIR}
 		rsync -avuP ${REF_PATH_FA} ${INDIR}
 
 else
@@ -130,16 +134,23 @@ fi
 if [ ! -f ${INDIR}/${HAPL} ]; then
 
 	echo "${line[0]} - building giraffe indices - " $(TZ=${ZONE} date) >> ${LOGFILE}
+	
+	## writes distance index needed for writing haplotype index
 	apptainer exec ${VG_IMAGE} \
 	vg index \
+		-t ${VG_HAP_NTHREADS} \
 		--dist-name ${DIST} \
+		--no-nested-distance \
 		${GBZ}
 
+	## writes r-index needed for writing haplotype index
 	apptainer exec ${VG_IMAGE} \
 	vg gbwt \
+		--num-threads ${VG_HAP_NTHREADS} \
 		--gbz-input ${GBZ} \
 		--r-index ${RI}
 
+	## writes minimizer index needed for writing haplotype index
 	apptainer exec ${VG_IMAGE} \
 	vg minimizer \
 		-d ${DIST} \
@@ -147,6 +158,7 @@ if [ ! -f ${INDIR}/${HAPL} ]; then
 		-o ${MIN} \
 		${GBZ}
 		
+	## writes graph haplotype info for subgraph construction
 	apptainer exec ${VG_IMAGE} \
 	vg haplotypes \
 		--distance-index ${DIST} \
