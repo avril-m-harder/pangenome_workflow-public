@@ -166,6 +166,7 @@ done
 FULL_GFA="${RUN_ID}.full.gfa"
 CLIP_GFA="${RUN_ID}.gfa"
 
+## GFA must be decompressed or PG-SCUnK gets confused
 gunzip ${RUN_ID}/${FULL_GFA}.gz
 gunzip ${RUN_ID}/${CLIP_GFA}.gz
 
