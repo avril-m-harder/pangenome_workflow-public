@@ -105,9 +105,9 @@ Rscript --vanilla \
 	${ACC_FUNC_DIR}/ACC_R02_collapsing_and_plotting_overlaps.R \
 	${TAXON}
 
-Rscript --vanilla \
-	${ACC_FUNC_DIR}/ACC_R02_plotting_clipped_by_chrom_and_samp.R \
-	${TAXON}
+# Rscript --vanilla \
+# 	${ACC_FUNC_DIR}/ACC_R02_plotting_clipped_by_chrom_and_samp.R \
+# 	${TAXON}
 
 # -----------------------------------------------------------------------------
 # Clean up tmp dir

@@ -83,7 +83,7 @@ fi
 # https://github.com/vgteam/vg/wiki/Haplotype-Sampling
 # -----------------------------------------------------------------------------
 
-echo "building GBZ from GFA - " $(TZ=${ZONE} date) >> ${LOGFILE}
+echo "building GBZ and XG from GFA - " $(TZ=${ZONE} date) >> ${LOGFILE}
 if [ ! -f ${INDIR}/${GBZ} ]; then
 
 
@@ -190,7 +190,7 @@ ${GRAPH_STATS_DIR}/minigraph_split_logs.txt
 Rscript --vanilla \
 	${SCRIPT_DIR}/R01_chrom_coverage_stats.R \
 	${GRAPH_STATS_DIR}/minigraph_split_logs.txt \
-	${GRAPH_STATS_PLOTS}/${TAXON}_chrom_coverage_plots.pdf
+	${GRAPH_STATS_PLOTS}/${TAXON}_chrom_coverage_props.pdf
 	
 ## Panacus plots: can be customized by editing ${INFO_DIR}/panacus_report.yaml
 base=$(basename ${GFA} .gfa)
