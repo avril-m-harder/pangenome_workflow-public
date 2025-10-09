@@ -12,7 +12,7 @@ source /home/######/pangenome_workflow/scripts/99_init_script_vars.sh
 # -----------------------------------------------------------------------------
 
 mamba create -p ${MAMBA}/pg_tools \
-	kmc \
+	kmc=3.2.1 \
 	odgi \
 	panacus \
 	samtools \
