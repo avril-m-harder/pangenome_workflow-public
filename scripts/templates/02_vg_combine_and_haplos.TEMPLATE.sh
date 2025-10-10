@@ -222,6 +222,8 @@ done
 Rscript --vanilla \
 	${SCRIPT_DIR}/R03_plotting_clipped_by_chrom_and_samp.R \
 	${TAXON}
+
+rsync -avuP *.pdf ${GRAPH_STATS_PLOTS}
 	
 ## Panacus plots: can be customized by editing ${INFO_DIR}/panacus_report.yaml
 BASE=$(basename ${GFA} .gfa)
