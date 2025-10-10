@@ -17,6 +17,7 @@
 | |____99_init_script_vars.sh
 | |____R01_chrom_coverage_stats.R
 | |____R02_chrom_coverage_graphics.R
+| |____R03_plotting_clipped_by_chrom_and_samp.R
 | |____templates
 |   |____01_minigraph-cactus_sCHROM.TEMPLATE.sh
 |   |____02_vg_combine_and_haplos.TEMPLATE.sh
